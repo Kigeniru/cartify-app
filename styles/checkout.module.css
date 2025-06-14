@@ -1,0 +1,128 @@
+body {
+  margin: 0;
+  font-family: Arial, sans-serif;
+  background-color: #ffffff;
+}
+
+.header {
+  background-color: #112b46; /* From vanilla-header */
+  color: white;
+  padding: 15px 40px; /* Adjusted for consistency with vanilla-header */
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+}
+
+.header-left {
+  display: flex;
+  align-items: center;
+  gap: 20px;
+}
+
+.logo img {
+  width: 45px; /* Updated to match vanilla header style */
+  height: 45px;
+}
+
+nav a {
+  color: white;
+  margin: 0 30px;
+  text-decoration: none;
+  transition: color 0.3s ease, transform 0.3s ease, font-weight 0.3s ease;
+}
+
+nav a.active {
+  font-weight: 700;
+}
+
+nav a:hover {
+  color: #A4DBF0;
+}
+
+.cart-icon {
+  font-size: 24px;
+  cursor: pointer;
+}
+
+.container {
+  display: flex;
+  justify-content: center;
+  align-items: flex-start;
+  padding-top: 3rem;
+  padding-bottom: 2rem;
+}
+
+.payment-card {
+  background-color: #B8D6F1;
+  border-radius: 20px;
+  padding: 3rem 2rem;
+  width: 350px;
+  box-shadow: 0px 10px 30px rgba(0, 0, 0, 0.1);
+  text-align: center;
+}
+
+.payment-logo {
+  background-color: #2D7FF9;
+  border-radius: 20px;
+  padding: 1.5rem;
+  color: white;
+  font-weight: bold;
+  font-size: 1.2rem;
+  margin-bottom: 2rem;
+}
+
+.qr-code {
+  width: 200px;
+  margin: 1rem auto;
+  border: 2px solid #2D7FF9;
+  border-radius: 10px;
+}
+
+.upload-btn {
+  padding: 10px;
+  border: 1px solid #2D7FF9;
+  background-color: #2D7FF9;
+  width: 250px;
+  color: white;
+  border-radius: 5px;
+  cursor: pointer;
+}
+
+.upload-btn:hover {
+  background-color: #1C5DA8;
+}
+
+.proof-preview {
+    margin-top: 10px;
+    color: #333;
+    font-size: 1rem;
+  }
+  
+
+.proceed-btn {
+    margin-top: 1rem;
+    padding: 0.75rem 1.5rem;
+    border: 1px solid #2D7FF9;
+    background-color: #2D7FF9;
+    color: white;
+    border-radius: 5px;
+    cursor: pointer;
+    font-weight: bold;
+    transition: background-color 0.3s ease;
+  }
+  
+  .proceed-btn:hover {
+    background-color: #1C5DA8;
+  }
+  
+  .proceed-btn:disabled {
+    background-color: #A4DBF0;
+    cursor: not-allowed;
+  }
+  
+  .contact-number {
+    color: black;
+    font-weight: bold;
+    margin-top: -10px;
+  }

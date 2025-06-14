@@ -1,0 +1,129 @@
+* {
+    box-sizing: border-box;
+    font-family: Arial, sans-serif;
+    margin: 0;
+    padding: 0;
+  }
+  
+  html,
+  body {
+    margin: 0;
+    padding: 0;
+  }
+  
+  header {
+    background-color: #112b46;
+    color: white;
+    padding: 15px 40px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    flex-wrap: wrap;
+  }
+  
+  .headerLeft {
+    display: flex;
+    align-items: center;
+    gap: 20px;
+  }
+  
+  .logo img {
+    width: 45px;
+    height: 45px;
+  }
+  
+  nav a {
+    color: white;
+    margin: 0 30px;
+    text-decoration: none;
+    transition: color 0.3s ease, transform 0.3s ease, font-weight 0.3s ease;
+  }
+  
+  nav a.active {
+    font-weight: 700;
+  }
+  
+  nav a:hover {
+    color: #a4dbf0;
+  }
+  
+  .cartIcon {
+    font-size: 24px;
+    cursor: pointer;
+  }
+  
+  .container {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    padding: 60px 20px;
+  }
+  
+  .locationCard {
+    background-color: #eeeeee;
+    border-radius: 40px;
+    padding: 40px 20px;
+    width: 300px;
+    height: auto;
+    min-height: 600px;
+    text-align: center;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: space-between;
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+  }
+  
+  .locationCard:hover {
+    transform: scale(1.125);
+    box-shadow: 0 8px 12px rgba(0, 0, 0, 0.2);
+  }
+  
+  .locationCard div {
+    color: #333333; 
+    font-size: 1.2rem;
+    font-weight: bold;
+    margin-bottom: 1.5rem;
+  }
+
+  .locationStepText {
+    color: black;
+  }
+  
+  
+  input {
+    width: 100%;
+    padding: 0.5rem;
+    border-radius: 10px;
+    margin: 1rem 0;
+    border: none;
+  }
+  
+  button.customUploadLabel {
+    margin-top: 20px;
+    padding: 12px 28px;
+    font-size: 16px;
+    font-weight: bold;
+    border-radius: 25px;
+    background-color: white;
+    color: black;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+    border: none;
+  }
+  
+  button.customUploadLabel:disabled {
+    background-color: #cccccc;
+    cursor: not-allowed;
+  }
+  
+  button.customUploadLabel:hover:not(:disabled) {
+    background-color: rgb(242, 63, 87);
+  }
+  
+  .selectedDelivery {
+    margin-bottom: 1.5rem;
+    color: #333333; /* Darker color for visibility */
+  }
+  

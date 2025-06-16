@@ -26,6 +26,8 @@ import Delivery from "./components/delivery";
 import Location from "./components/location";
 import Summary from "./components/summary";
 import Complete from "./components/complete";
+import Navbar from "./components/Navbar/Navbar";
+
 
 
 import { ToastContainer } from "react-toastify";
@@ -33,7 +35,13 @@ import "react-toastify/dist/ReactToastify.css";
 import { auth } from "./components/firebase";
 
 function App() {
-  const [user, setUser] = useState();
+return (
+  <div className="overflow-x-hidden"> 
+    <Navbar/>
+  </div>
+);
+
+ /* const [user, setUser] = useState();
 
   useEffect(() => {
     const unsubscribe = auth.onAuthStateChanged((user) => {
@@ -73,7 +81,9 @@ function App() {
         <ToastContainer />
       </div>
     </Router>
-  );
+
+    
+  ); */
 }
 
 export default App;

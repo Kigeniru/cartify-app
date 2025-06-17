@@ -1,28 +1,37 @@
-import React from "react";
-import { NavbarMenu } from "./NavbarData";
+import React, { useState } from 'react';
+import logo from '../../assets/mvillo-logo.png';
+import { FaSearch } from "react-icons/fa";
 import { FaBasketShopping } from "react-icons/fa6";
-import { MdMenu } from "react-icons/md";
+import './Navbar.css';
+import { Link } from 'react-router-dom';
 
+const Navbar = ({setShowLogin}) => {
 
-const Navbar = () => {
-    return <nav>
-        <div className="container">
-            <div className="text-2xl flex items-center gap-2 font-bold py-8">
-               <p>MVILLO</p> 
-            </div>
-            <div className="hidden md:block">
-                <ul className="flex items-center gap-6 text-gray-600">
-                {NavbarMenu.map((item)=>{
-                    return <li key={item.id}>{item.title}
-                    <a href = {item.link} className="inline-block py-1 px-3 hover:text-gray font-semibold">{item.title}</a>
-                    </li>;
+    const [menu,setMenu] = useState("home");
+  return (
+    <div className='navbar'>
 
-                })}
-                </ul>
-            </div>
+      <div class="navbar-content">
+
+        <img src = {logo} alt="" className='logo' />
+        <ul class="navbar-menu">
+            <Link onClick={()=>setMenu("home")} className={menu==="home"?"active":""}>home</Link>
+            <a href='#'onClick={()=>setMenu("menu")} className={menu==="menu"?"active":""}>products</a>
+            <a href='#'onClick={()=>setMenu("mobile-app")} className={menu==="mobile-app"?"active":""}>mobile-app</a>
+            <a href='footer'onClick={()=>setMenu("contact us")} className={menu==="contact-us"?"active":""}>contact us</a>
+        </ul>
+        <div class="navbar-right">
+           
+           <div class="navbar-search-icon">
+
+            <FaBasketShopping className='icon'/>
+            <div class="dot"></div>
+           </div>
+           <button onClick={()=>setShowLogin(true)}>sign-in</button>
         </div>
-    
-    </nav>
-};
+      </div>
+    </div>
+  )
+}
 
-export default Navbar;
+export default Navbar

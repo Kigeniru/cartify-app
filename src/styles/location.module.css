@@ -92,14 +92,14 @@
   }
   
   
-  input {
+ /* input {
     width: 100%;
     padding: 0.5rem;
     border-radius: 10px;
     margin: 1rem 0;
     border: none;
   }
-  
+  */
   button.customUploadLabel {
     margin-top: 20px;
     padding: 12px 28px;

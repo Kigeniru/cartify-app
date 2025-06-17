@@ -33,12 +33,33 @@ import Navbar from "./components/Navbar/Navbar";
 import { ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import { auth } from "./components/firebase";
+import Home from "./pages/Home/Home";
+import PlaceOrder from "./pages/PlaceOrder/PlaceOrder";
+import Basket from "./pages/Cart/Cart";
+import Footer from "./components/Footer/Footer"
+import LoginPopUp from "./components/LoginPopUp/LoginPopUp";
+
 
 function App() {
+
+  const[showLogin,setShowLogin] = useState(false)
 return (
-  <div className="overflow-x-hidden"> 
-    <Navbar/>
+  <>
+  {showLogin?<LoginPopUp setShowLogin={setShowLogin}/>:<></>}
+  <div className="app"> 
+  
+    <Navbar setShowLogin={setShowLogin}/>
+    <div class="app-content">
+    <Routes> 
+      <Route path='/' element={<Home/>} />
+      <Route path='/cart' element={<Basket/>} />
+      <Route path='/order' element={<PlaceOrder/>} />
+
+    </Routes>
+    </div>
+    <Footer/>
   </div>
+  </>
 );
 
  /* const [user, setUser] = useState();

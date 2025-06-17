@@ -48,7 +48,7 @@
     border-radius: 4px;
 }
 
-.login-popup-container button{
+.login-signup-btn{
     border:none;
     padding: 10px;
     border-radius: 4px;
@@ -74,4 +74,31 @@
     color:blueviolet;
     font-weight: semi-bold;
     cursor:pointer;
+}
+
+.password-field {
+  position: relative;
+  display: flex;
+  align-items: center;
+}
+
+.password-field input {
+  width: 100%;
+  padding-right: 2.5rem;
+}
+
+.toggle-password {
+  position: absolute;
+  right: 10px;
+  cursor: pointer;
+  color: #888;
+  font-size: 1.2rem;
+}
+
+.forgot-password {
+  color: #888;
+  text-decoration: underline;
+  cursor: pointer;
+  text-align: right;
+  font-size: 0.9rem;
 }

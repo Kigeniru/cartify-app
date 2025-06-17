@@ -38,13 +38,15 @@ import PlaceOrder from "./pages/PlaceOrder/PlaceOrder";
 import Basket from "./pages/Cart/Cart";
 import Footer from "./components/Footer/Footer"
 import LoginPopUp from "./components/LoginPopUp/LoginPopUp";
-
+import ProfileSettings from "./pages/ProfileSettings/ProfileSettings";
 
 function App() {
 
   const[showLogin,setShowLogin] = useState(false)
 return (
   <>
+        <ToastContainer />
+
   {showLogin?<LoginPopUp setShowLogin={setShowLogin}/>:<></>}
   <div className="app"> 
   
@@ -54,6 +56,7 @@ return (
       <Route path='/' element={<Home/>} />
       <Route path='/cart' element={<Basket/>} />
       <Route path='/order' element={<PlaceOrder/>} />
+      <Route path='/profile' element={<ProfileSettings/>} />
 
     </Routes>
     </div>

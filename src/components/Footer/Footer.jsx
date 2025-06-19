@@ -1,5 +1,6 @@
 import React from 'react'
 import './Footer.css'
+import { Link } from 'react-router-dom';
 import logo from '../../assets/mvillo-logo.png';
 const Footer = () => {
   return (
@@ -14,15 +15,15 @@ const Footer = () => {
         
             <div class="footer-content-center">
                 <h2>COMPANY</h2>
-                <ul>
-                    <li>Home</li>
-                    <li>Delivery</li>
-                    <li>Privacy Policy</li>
-                    <li>Product Care</li>
-                </ul>
+               <ul>
+    <li><Link to="/" className="text-white no-underline transition-all duration-200 hover:text-gray-300 hover:scale-105">Home</Link></li>
+    <li><Link to="/product-care" className="text-white no-underline transition-all duration-200 hover:text-gray-300 hover:scale-105">Product Care</Link></li>
+    <li><Link to="/terms-and-conditions" className="text-white no-underline transition-all duration-200 hover:text-gray-300 hover:scale-105">Terms and Conditions</Link></li>
+    <li><Link to="/privacy-policy" className="text-white no-underline transition-all duration-200 hover:text-gray-300 hover:scale-105">Privacy Policy</Link></li>
+</ul>
             </div>
              <div class="footer-content-right">
-                <h2> GET IN TOUCH</h2>
+                <h2> CONTACT US</h2>
                 <ul>
                     <li>+09171234567</li>
                     <li>dummy@mail.com</li>

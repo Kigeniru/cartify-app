@@ -11,7 +11,7 @@ import {
 import Login from "./components/login";
 import SignUp from "./components/register";
 import Profile from "./components/profile";
-import Product from "./components/product";
+//import Product from "./components/product";
 import Vanilla from "./components/vanilla";
 import Pandan from "./components/pandan";
 import Mango from "./components/mango";
@@ -39,7 +39,11 @@ import Basket from "./pages/Cart/Cart";
 import Footer from "./components/Footer/Footer"
 import LoginPopUp from "./components/LoginPopUp/LoginPopUp";
 import ProfileSettings from "./pages/ProfileSettings/ProfileSettings";
-
+import Product from "./components/Product/Product";
+import ProductDetail from "./components/Product/ProductDetail";
+import TermsAndConditions from "./pages/StaticPage/TermsAndConditions";
+import ProductCare from "./pages/StaticPage/ProductCare";
+import PrivacyPolicy from "./pages/StaticPage/PrivacyPolicy";
 function App() {
 
   const[showLogin,setShowLogin] = useState(false)
@@ -54,9 +58,16 @@ return (
     <div class="app-content">
     <Routes> 
       <Route path='/' element={<Home/>} />
+      <Route path='/product' element={<Product/>} />
+      <Route path='/product/:id' element={<ProductDetail />} />
+
       <Route path='/cart' element={<Basket/>} />
       <Route path='/order' element={<PlaceOrder/>} />
       <Route path='/profile' element={<ProfileSettings/>} />
+
+       <Route path='/terms-and-conditions' element={<TermsAndConditions/>} />
+       <Route path='/product-care' element={<ProductCare/>} />
+       <Route path='/privacy-policy' element={<PrivacyPolicy/>} />
 
     </Routes>
     </div>

@@ -30,7 +30,7 @@ function SignInwithGoogle() {
       <button type="button" class="login-with-google-btn" onClick={googleLogin} >
   Continue with Google
 </button>
-    <br/>
+   
       <p className="continue-p">OR</p> 
     </div>
   );

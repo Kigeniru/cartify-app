@@ -33,6 +33,13 @@
     list-style: none;
     margin-bottom: 10px;
     cursor: pointer;
+    color: white;
+    text-decoration: none;
+   
+}
+
+.footer-content-center li a{
+    text-decoration: none;
 }
 
 .footer-content-right h2, .footer-content-center h2{

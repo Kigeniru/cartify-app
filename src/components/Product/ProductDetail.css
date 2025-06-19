@@ -1,0 +1,424 @@
+/* Base Styles */
+.product-detail {
+  display: flex;
+  align-items: center;
+  justify-content: space-around;
+  padding: 60px;
+  min-height: calc(100vh - 120px); /* Adjust based on your header/footer height */
+  overflow: hidden; /* Prevent content overflow during initial animations or subtle movements */
+}
+
+.left {
+  position: relative;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  flex-shrink: 0;
+  /* Initial animation for the left section */
+  animation: fadeInSlideIn 0.8s ease-out forwards;
+  opacity: 0;
+  transform: translateX(-50px);
+}
+
+.circle-bg {
+  background: linear-gradient(to bottom right, #f8e5d0, #f6d2a9);
+  border-radius: 40%;
+  width: 400px;
+  height: 400px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+  overflow: hidden; /* Clips the overlapping bubbles */
+  z-index: 2; /* Above bubbles (z-index:0) but below arrows (z-index:2) */
+  transition: box-shadow 0.3s ease; /* Smooth shadow change on hover */
+}
+
+/* Hover effect for the circle-bg */
+.left:hover .circle-bg {
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.15);
+}
+
+/* Styles for the "bubble" elements */
+.bubble {
+  position: absolute;
+  border-radius: 50%;
+  background: radial-gradient(circle at 60% 60%, #ffe9c3, #fcd07f);
+  opacity: 0.9;
+  z-index: 1; /* Position behind the main product image and circle-bg */
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.05);
+  transition: transform 0.5s ease-out, opacity 0.5s ease-out; /* Smooth movement transition */
+}
+
+.bubble-top-right-large {
+  width: 150px;
+  height: 150px;
+  top: -45px;
+  right: -10px;
+}
+
+.bubble-top-right-small {
+  width: 77px;
+  height: 77px;
+  top: 60px;
+  right: -30px;
+}
+
+.bubble-bottom-left {
+  width: 150px;
+  height: 150px;
+  bottom: -40px;
+  left: -20px;
+}
+
+/* Animation class for bubbles */
+.bubble-animated {
+  animation: bubbleDrift 0.6s ease-out forwards;
+}
+
+/* Keyframe for bubble movement */
+@keyframes bubbleDrift {
+  0% { transform: translate(0, 0); opacity: 0.9; }
+  50% { transform: translate(5px, -5px); opacity: 1; } /* Slight move and brighten */
+  100% { transform: translate(0, 0); opacity: 0.9; } /* Return to original */
+}
+
+
+.detail-img {
+  width: 280px;
+  position: relative;
+  z-index: 1; /* Ensure image is above bubbles within circle-bg */
+  transition: transform 0.3s ease; /* Smooth scale on hover */
+}
+
+/* Hover effect for the detail image */
+.left:hover .detail-img {
+  transform: scale(1.08);
+}
+
+
+.slider-arrow {
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
+  background-color: rgba(255, 255, 255, 0.6);
+  border-radius: 50%;
+  width: 50px;
+  height: 50px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  font-size: 1.5rem;
+  color: #333;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
+  transition: all 0.3s ease;
+  z-index: 2; /* Ensure arrows are above everything in .left */
+  animation: arrowPulse 2s infinite alternate; /* Gentle pulsing animation */
+}
+
+.slider-arrow:hover {
+  background-color: rgba(255, 255, 255, 0.9);
+  transform: translateY(-50%) scale(1.1); /* Slightly enlarge on hover */
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+  animation: none; /* Stop pulsing on hover */
+}
+
+.arrow-left {
+  left: -25px;
+}
+
+.arrow-right {
+  right: -25px;
+}
+
+.right {
+  max-width: 450px;
+  text-align: left;
+  flex-shrink: 0;
+  /* Initial animation for the right section */
+  animation: fadeInSlideIn 0.8s ease-out forwards;
+  opacity: 0;
+  transform: translateX(50px);
+  animation-delay: 0.2s; /* Make it appear slightly after the left side */
+}
+
+.category {
+  color: #f2c94c;
+  font-weight: bold;
+  font-size: 1.2rem;
+}
+
+.product-title {
+  font-size: 3rem;
+  font-weight: bold;
+  margin: 10px 0;
+}
+
+.product-desc {
+  font-size: 1rem;
+  color: #333;
+}
+
+.ingredients {
+  display: flex;
+  align-items: center;
+  margin-top: 15px;
+  justify-content: flex-start;
+}
+
+.ingredient-circle {
+  width: 80px;
+  height: 80px;
+  border-radius: 50%;
+  background-color: #fff5d1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-right: 15px;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
+  transition: all 0.3s ease;
+  cursor: pointer;
+}
+
+.ingredient-circle:hover {
+  transform: translateY(-5px) scale(1.05);
+  box-shadow: 0 6px 12px rgba(0, 0, 0, 0.15);
+  background-color: #fff0bb;
+}
+
+.ingredient-circle img {
+  width: 50px;
+  height: auto;
+}
+
+.add-cart {
+  margin-top: 30px;
+  padding: 15px 30px;
+  background: #f2c94c;
+  border: none;
+  border-radius: 25px;
+  font-size: 1rem;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+}
+
+.add-cart:hover {
+  background: #ffdd70;
+  transform: translateY(-2px);
+  box-shadow: 0 8px 16px rgba(0, 0, 0, 0.2);
+}
+
+
+/* Keyframe Animations */
+@keyframes fadeInSlideIn {
+  from {
+    opacity: 0;
+    transform: translateX(-50px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+@keyframes arrowPulse {
+  0% { transform: translateY(-50%) scale(1); opacity: 0.6; }
+  50% { transform: translateY(-50%) scale(1.05); opacity: 0.9; }
+  100% { transform: translateY(-50%) scale(1); opacity: 0.6; }
+}
+
+
+/* --- Responsive Adjustments --- */
+
+/* For tablets and smaller desktops (e.g., screens up to 992px wide) */
+@media (max-width: 992px) {
+  .product-detail {
+    padding: 40px;
+    flex-direction: column; /* Stack left and right */
+    align-items: center; /* Center items when stacked */
+  }
+
+  .left {
+    margin-bottom: 40px; /* Space between image and text */
+    /* Remove specific initial animation for smaller screens if it conflicts with stacking */
+    animation: none;
+    transform: none;
+    opacity: 1;
+  }
+
+  .right {
+    max-width: 100%;
+    text-align: center;
+    /* Remove specific initial animation */
+    animation: none;
+    transform: none;
+    opacity: 1;
+  }
+
+  .circle-bg {
+    width: 350px;
+    height: 350px;
+    border-radius: 50%; /* Make it a perfect circle on smaller screens */
+  }
+
+  .detail-img {
+    width: 250px;
+  }
+
+  /* Adjust bubble sizes and positions for smaller circle-bg */
+  .bubble-top-right-large {
+    width: 120px;
+    height: 120px;
+    top: -30px;
+    right: -10px;
+  }
+
+  .bubble-top-right-small {
+    width: 60px;
+    height: 60px;
+    top: 50px;
+    right: -20px;
+  }
+
+  .bubble-bottom-left {
+    width: 120px;
+    height: 120px;
+    bottom: -30px;
+    left: -10px;
+  }
+
+  .slider-arrow {
+    width: 40px;
+    height: 40px;
+    font-size: 1.2rem;
+  }
+  .arrow-left {
+    left: -15px;
+  }
+  .arrow-right {
+    right: -15px;
+  }
+
+  .product-title {
+    font-size: 2.5rem;
+  }
+
+  .ingredients {
+    justify-content: center; /* Center ingredient circles */
+  }
+}
+
+/* For mobile phones (e.g., screens up to 768px wide) */
+@media (max-width: 768px) {
+  .product-detail {
+    padding: 30px 20px;
+  }
+
+  .left {
+    margin-bottom: 30px;
+  }
+
+  .circle-bg {
+    width: 280px;
+    height: 280px;
+  }
+
+  .detail-img {
+    width: 200px;
+  }
+
+  /* Further adjust bubble sizes and positions for very small circle-bg */
+  .bubble-top-right-large {
+    width: 90px;
+    height: 90px;
+    top: -20px;
+    right: -5px;
+  }
+
+  .bubble-top-right-small {
+    width: 45px;
+    height: 45px;
+    top: 40px;
+    right: -10px;
+  }
+
+  .bubble-bottom-left {
+    width: 90px;
+    height: 90px;
+    bottom: -25px;
+    left: -10px;
+  }
+
+  .slider-arrow {
+    width: 35px;
+    height: 35px;
+    font-size: 1rem;
+  }
+  .arrow-left {
+    left: -10px;
+  }
+  .arrow-right {
+    right: -10px;
+  }
+
+
+  .product-title {
+    font-size: 2rem;
+  }
+
+  .product-desc {
+    font-size: 0.9rem;
+  }
+
+  .ingredient-circle {
+    width: 60px;
+    height: 60px;
+    margin-right: 10px;
+  }
+
+  .ingredient-circle img {
+    width: 40px;
+  }
+
+  .add-cart {
+    padding: 12px 25px;
+    font-size: 0.9rem;
+  }
+}
+
+/* For very small mobile devices (e.g., screens up to 480px wide) */
+@media (max-width: 480px) {
+  .product-detail {
+    padding: 20px 15px;
+  }
+
+  .circle-bg {
+    width: 240px;
+    height: 240px;
+  }
+
+  .detail-img {
+    width: 180px;
+  }
+
+  .bubble-top-right-large {
+    width: 70px;
+    height: 70px;
+    top: -15px;
+    right: 0px;
+  }
+  .bubble-top-right-small {
+    width: 35px;
+    height: 35px;
+    top: 30px;
+    right: -5px;
+  }
+  .bubble-bottom-left {
+    width: 70px;
+    height: 70px;
+    bottom: -20px;
+    left: 0px;
+  }
+}

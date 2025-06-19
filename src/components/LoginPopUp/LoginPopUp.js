@@ -9,6 +9,7 @@ import SignInwithGoogle from './signInWIthGoogle';
 
 import { sendPasswordResetEmail } from "firebase/auth";
 import { sendEmailVerification } from "firebase/auth";
+import { Link } from 'react-router-dom';
 
 
 const LoginPopUp = ({ setShowLogin }) => {
@@ -50,6 +51,7 @@ const LoginPopUp = ({ setShowLogin }) => {
           email: user.email,
           firstName: fname,
           lastName: lname,
+          contactInfo: "",
           photo: ""
         });
 
@@ -217,7 +219,7 @@ const handleLogin = async (e) => {
 
         <div className="login-popup-condition">
           <input type="checkbox" required />
-          <p>By continuing, I agree to the terms of use & privacy policy</p>
+          <p>By continuing, I agree to the <Link to='/terms-and-conditions'> terms and conditions </Link> & <Link to='privacy-place'>privacy policy</Link></p>
         </div>
 
         {currState === "Login" ? (

@@ -3,6 +3,7 @@ import { auth, db, storage } from "../../components/firebase"; // Import 'storag
 import { doc, getDoc, updateDoc } from "firebase/firestore";
 import { ref, uploadBytes, getDownloadURL } from "firebase/storage"; // Import Storage functions
 import { toast } from "react-toastify";
+import Autocomplete from "react-google-autocomplete";
 
 function Profile() {
   const [userDetails, setUserDetails] = useState(null);
@@ -141,6 +142,7 @@ function Profile() {
         firstName: editFormData.firstName,
         lastName: editFormData.lastName,
         contactInfo: editFormData.contactInfo,
+        deliveryInfo: editFormData.deliveryInfo,
       });
       setUserDetails(editFormData); // Update displayed details
       setHasChanges(false); // Reset changes flag for text fields
@@ -161,7 +163,7 @@ function Profile() {
 
   // --- Render Logic ---
   return (
-    <div className="flex flex-col items-center justify-center min-h-screen bg-gray-100 p-4">
+    <div className="flex flex-col items-center justify-center min-h-screen bg-white-100 p-4">
       {userDetails ? (
         <div className="flex flex-col md:flex-row items-start gap-8 w-full max-w-4xl">
           {/* Profile Photo Card */}
@@ -241,6 +243,18 @@ function Profile() {
                 />
               </div>
 
+              <div className="mb-4">
+                <label htmlFor="deliveryInfo" className="block text-gray-700 text-sm font-bold mb-2">Delivery Information:</label>
+                <input
+                  type="text"
+                  id="deliveryInfo"
+                  name="deliveryInfo"
+                  value={editFormData.deliveryInfo || ''}
+                  onChange={handleChange}
+                  className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:ring-2 focus:ring-blue-500"
+                />
+              </div>
+
               <div className="flex flex-col space-y-3 mt-6">
                 {/* Save Changes button - always visible, enabled based on hasChanges */}
                 <button
@@ -270,5 +284,7 @@ function Profile() {
     </div>
   );
 }
+
+
 
 export default Profile;

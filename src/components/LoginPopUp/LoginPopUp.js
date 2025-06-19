@@ -52,6 +52,7 @@ const LoginPopUp = ({ setShowLogin }) => {
           firstName: fname,
           lastName: lname,
           contactInfo: "",
+          deliveryInfo: "",
           photo: ""
         });
 

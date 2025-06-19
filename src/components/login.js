@@ -2,7 +2,7 @@ import { signInWithEmailAndPassword } from "firebase/auth";
 import React, { useState } from "react";
 import { auth } from "./firebase";
 import { toast } from "react-toastify";
-import SignInwithGoogle from "./signInWIthGoogle";
+import SignInwithGoogle from "./LoginPopUp/signInWIthGoogle";
 import "../styles/login.css"; 
 import logo from "../assets/mvillo-logo.png"; 
 

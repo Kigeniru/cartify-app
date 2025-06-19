@@ -49,7 +49,7 @@ function French() {
 
   return (
     <div className={styles["french-theme"]}>
-      <header className={styles["french-header"]}>
+     {/*<header className={styles["french-header"]}>
         <div className={styles["header-left"]}>
           <div className={styles["logo"]}>
             <img src={icon} alt="Site Icon" />
@@ -67,7 +67,7 @@ function French() {
             </svg>
           </div>
         </a>
-      </header>
+      </header> */}
 
       <main className={styles["french-main"]}>
         <div className={styles["product-container"]}>

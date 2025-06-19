@@ -1,8 +1,8 @@
 import { GoogleAuthProvider, signInWithPopup } from "firebase/auth";
-import { auth, db } from "./firebase";
+import { auth, db } from "../firebase";
 import { toast } from "react-toastify";
 import { setDoc, doc } from "firebase/firestore";
-
+import './SignInWithGoogle.css'
 function SignInwithGoogle() {
   function googleLogin() {
     const provider = new GoogleAuthProvider();
@@ -19,20 +19,19 @@ function SignInwithGoogle() {
         toast.success("User logged in Successfully", {
           position: "top-center",
         });
-        window.location.href = "/product"; // Redirect to /product after login
+        window.location.href = "/"; // Redirect to /product after login
       }
     });
   }
 
   return (
-    <div>
-      <p className="continue-p">--Or continue with--</p>
-      <div
-        style={{ display: "flex", justifyContent: "center", cursor: "pointer" }}
-        onClick={googleLogin}
-      >
-        <img src={require("../google.png")} width={"60%"} />
-      </div>
+    <div className="login-with-google-container">
+      
+      <button type="button" class="login-with-google-btn" onClick={googleLogin} >
+  Continue with Google
+</button>
+   
+      <p className="continue-p">OR</p> 
     </div>
   );
 }

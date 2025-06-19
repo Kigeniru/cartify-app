@@ -11,7 +11,7 @@ import {
 import Login from "./components/login";
 import SignUp from "./components/register";
 import Profile from "./components/profile";
-import Product from "./components/product";
+//import Product from "./components/product";
 import Vanilla from "./components/vanilla";
 import Pandan from "./components/pandan";
 import Mango from "./components/mango";
@@ -26,14 +26,57 @@ import Delivery from "./components/delivery";
 import Location from "./components/location";
 import Summary from "./components/summary";
 import Complete from "./components/complete";
+import Navbar from "./components/Navbar/Navbar";
+
 
 
 import { ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import { auth } from "./components/firebase";
-
+import Home from "./pages/Home/Home";
+import PlaceOrder from "./pages/PlaceOrder/PlaceOrder";
+import Basket from "./pages/Cart/Cart";
+import Footer from "./components/Footer/Footer"
+import LoginPopUp from "./components/LoginPopUp/LoginPopUp";
+import ProfileSettings from "./pages/ProfileSettings/ProfileSettings";
+import Product from "./components/Product/Product";
+import ProductDetail from "./components/Product/ProductDetail";
+import TermsAndConditions from "./pages/StaticPage/TermsAndConditions";
+import ProductCare from "./pages/StaticPage/ProductCare";
+import PrivacyPolicy from "./pages/StaticPage/PrivacyPolicy";
 function App() {
-  const [user, setUser] = useState();
+
+  const[showLogin,setShowLogin] = useState(false)
+return (
+  <>
+        <ToastContainer />
+
+  {showLogin?<LoginPopUp setShowLogin={setShowLogin}/>:<></>}
+  <div className="app"> 
+  
+    <Navbar setShowLogin={setShowLogin}/>
+    <div class="app-content">
+    <Routes> 
+      <Route path='/' element={<Home/>} />
+      <Route path='/product' element={<Product/>} />
+      <Route path='/product/:id' element={<ProductDetail />} />
+
+      <Route path='/cart' element={<Basket/>} />
+      <Route path='/order' element={<PlaceOrder/>} />
+      <Route path='/profile' element={<ProfileSettings/>} />
+
+       <Route path='/terms-and-conditions' element={<TermsAndConditions/>} />
+       <Route path='/product-care' element={<ProductCare/>} />
+       <Route path='/privacy-policy' element={<PrivacyPolicy/>} />
+
+    </Routes>
+    </div>
+    <Footer/>
+  </div>
+  </>
+);
+
+ /* const [user, setUser] = useState();
 
   useEffect(() => {
     const unsubscribe = auth.onAuthStateChanged((user) => {
@@ -73,7 +116,9 @@ function App() {
         <ToastContainer />
       </div>
     </Router>
-  );
+
+    
+  ); */
 }
 
 export default App;

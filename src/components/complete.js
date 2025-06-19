@@ -20,7 +20,7 @@ const Complete = () => {
         <h2>Thank you for ordering!</h2>
         <p style={{ fontSize: '1.1rem', textAlign: 'center', marginTop: '1em' }}>
           Your order is being processed now.
-          <br />
+         
           Please await a confirmation email.
         </p>
 

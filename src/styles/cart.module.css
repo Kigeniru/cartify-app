@@ -13,7 +13,7 @@ html, body {
 
 /* NAVBAR / HEADER */
 .cart-header {
-  background-color: #112b46;
+  background-color: blueviolet;
   color: white;
   padding: 15px 40px;
   display: flex;

@@ -27,6 +27,7 @@ import Location from "./components/location";
 import Summary from "./components/summary";
 import Complete from "./components/complete";
 import Navbar from "./components/Navbar/Navbar";
+import MyOrders from "./components/order";
 
 
 
@@ -62,7 +63,8 @@ return (
       <Route path='/product/:id' element={<ProductDetail />} />
 
       <Route path='/cart' element={<Basket/>} />
-      <Route path='/order' element={<PlaceOrder/>} />
+      <Route path='/myorders' element={<MyOrders/>} />
+      <Route path='/placeorder' element={<PlaceOrder/>} />
       <Route path='/profile' element={<ProfileSettings/>} />
 
        <Route path='/terms-and-conditions' element={<TermsAndConditions/>} />

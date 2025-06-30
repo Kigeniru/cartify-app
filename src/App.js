@@ -20,7 +20,7 @@ import Crinkle from "./components/crinkle";
 import French from "./components/french";
 import Twister from "./components/twister";
 import Crisscut from "./components/crisscut";
-import Cart from "./components/cart"; // This looks like an old Cart component path
+//import Cart from "./components/cart"; // This looks like an old Cart component path
 import Checkout from "./components/checkout";
 import Delivery from "./components/delivery";
 import Location from "./components/location";

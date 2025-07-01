@@ -2,6 +2,7 @@ import React, { useContext } from 'react';
 import './Cart.css';
 import { StoreContext } from './StoreContext';
 import { useNavigate } from 'react-router-dom';
+import { FaTrash } from "react-icons/fa";
 
 const Cart = () => {
     // Destructure the necessary functions from the context
@@ -37,7 +38,7 @@ const Cart = () => {
                                     <div key={item.id}>
                                         <div className='cart-items-title cart-items-item'>
                                             {/* Item Image */}
-                                            <img src={item.image} alt={item.name} className="cart-item-image" />
+                                            <img src={item.imageUrl} alt={item.name} className="cart-item-image" />
                                             {/* Item Name */}
                                             <p>{item.name}</p>
                                             {/* Item Price */}
@@ -54,7 +55,7 @@ const Cart = () => {
                                             <p>₱{(item.price * cartItems[item.id]).toFixed(2)}</p>
                                             
                                             {/* 'x' to remove the item completely now */}
-                                            <p onClick={() => removeCompletelyFromCart(item.id)} className='cross'>x</p>
+                                            <p onClick={() => removeCompletelyFromCart(item.id)} className='cross'><FaTrash/></p>
                                         </div>
                                         <hr />
                                     </div>

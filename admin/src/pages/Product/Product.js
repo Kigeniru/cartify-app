@@ -3,6 +3,10 @@ import './Product.css';
 import { collection, getDocs, deleteDoc, doc } from 'firebase/firestore';
 import { db } from '../../firebase';
 import { useNavigate } from 'react-router-dom';
+import { FaTrash } from "react-icons/fa";
+import ConfirmModal from '../../components/ConfirmModal/ConfirmModal'; // Import ConfirmModal
+import { toast } from 'react-toastify'; // Import toast
+
 
 const Product = () => {
   const [products, setProducts] = useState([]);
@@ -11,14 +15,40 @@ const Product = () => {
   const [categoryFilter, setCategoryFilter] = useState('');
   const navigate = useNavigate();
 
-  const handleDelete = async (id) => {
-    try {
-      await deleteDoc(doc(db, "products", id));
-      setProducts((prev) => prev.filter(product => product.id !== id));
-    } catch (error) {
-      console.error("Error deleting product:", error);
+  // --- NEW States for ConfirmModal (for delete) ---
+  const [showDeleteConfirmModal, setShowDeleteConfirmModal] = useState(false);
+  const [productIdToDelete, setProductIdToDelete] = useState(null);
+  // --- END NEW States ---
+
+  // --- MODIFIED: handleDelete now opens ConfirmModal ---
+  const handleDeleteClick = (id) => {
+    setProductIdToDelete(id);
+    setShowDeleteConfirmModal(true);
+  };
+
+  // --- NEW: handleConfirmDelete for the modal's confirm action ---
+  const handleConfirmDelete = async () => {
+    if (productIdToDelete) {
+      try {
+        await deleteDoc(doc(db, "products", productIdToDelete));
+        setProducts((prev) => prev.filter(product => product.id !== productIdToDelete));
+        toast.success("Product deleted successfully!");
+      } catch (error) {
+        console.error("Error deleting product:", error);
+        toast.error("Failed to delete product.");
+      } finally {
+        setShowDeleteConfirmModal(false);
+        setProductIdToDelete(null);
+      }
     }
   };
+
+  // --- NEW: handleCancelDelete for the modal's cancel action ---
+  const handleCancelDelete = () => {
+    setShowDeleteConfirmModal(false);
+    setProductIdToDelete(null);
+  };
+  // --- END NEW ---
 
   useEffect(() => {
     const fetchData = async () => {
@@ -40,11 +70,17 @@ const Product = () => {
         setCategories(categoriesArray);
       } catch (error) {
         console.error("Error fetching data:", error);
+        toast.error("Error fetching product data!"); // Added toast
       }
     };
 
     fetchData();
   }, []);
+
+  // --- NEW: handleRowClick for navigation to edit page ---
+  const handleRowClick = (productId) => {
+    navigate(`/product/edit/${productId}`);
+  };
 
   return (
     <div className='list add flex-col'>
@@ -74,8 +110,8 @@ const Product = () => {
         </select>
       </div>
 
-      <div className="list-table">
-        <div className="list-table-format title">
+      <div className="list-table-prod">
+        <div className="list-table-format-prod title">
           <b>Image</b>
           <b>Name</b>
           <b>Category</b>
@@ -84,25 +120,52 @@ const Product = () => {
         </div>
 
         {products
-          .filter(product =>
-            product.name.toLowerCase().includes(search) &&
-            (categoryFilter === '' || product.category === categoryFilter)
-          )
-          .map((product) => (
-            <div key={product.id} className="list-table-format">
-              <img
-                src={product.imageUrl}
-                alt={product.name}
-                className="product-image"
-                style={{ width: '100px', height: '100px', objectFit: 'cover' }}
-              />
-              <p>{product.name}</p>
-              <p>{product.category}</p>
-              <p>₱{product.price}</p>
-              <button onClick={() => handleDelete(product.id)}>Delete</button>
-            </div>
-          ))}
+        .filter(product =>
+          product.name.toLowerCase().includes(search) &&
+          (categoryFilter === '' || product.category === categoryFilter)
+        )
+        .map((product) => (
+          // Make the entire row clickable, except for the delete button
+          <div
+            key={product.id}
+            className="list-table-format-prod clickable-row" // Add a class for styling
+            onClick={() => handleRowClick(product.id)}
+          >
+            <img
+              src={product.imageUrl}
+              alt={product.name}
+              className="product-image"
+              style={{ width: '100px', height: '100px', objectFit: 'cover' }}
+            />
+            <p>{product.name}</p>
+            <p>{product.category}</p>
+            <p>
+              ₱{Number(product.price).toLocaleString('en-PH', {
+                minimumFractionDigits: 2,
+                maximumFractionDigits: 2,
+              })}
+            </p>
+            {/* The delete button needs its own click handler to prevent row click propagation */}
+            <button
+              onClick={(e) => {
+                e.stopPropagation(); // Stop the row click from firing
+                handleDeleteClick(product.id);
+              }}
+            >
+              <FaTrash className='action-icon' />
+            </button>
+          </div>
+      ))}
       </div>
+
+      {/* Render the ConfirmModal for deletion */}
+      <ConfirmModal
+        show={showDeleteConfirmModal}
+        title="Confirm Product Deletion"
+        message="Are you sure you want to delete this product? This action cannot be undone."
+        onConfirm={handleConfirmDelete}
+        onCancel={handleCancelDelete}
+      />
     </div>
   );
 };

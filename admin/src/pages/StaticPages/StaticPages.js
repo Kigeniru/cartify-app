@@ -1,84 +1,153 @@
 import React, { useEffect, useState } from 'react';
 import './StaticPages.css';
-import { collection, getDocs, doc, updateDoc } from 'firebase/firestore';
+import { collection, getDocs, setDoc, doc } from 'firebase/firestore';
 import { db } from '../../firebase';
 import { toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 
-const StaticPages = () => {
-  const [pages, setPages] = useState([]);
-  const [selectedPage, setSelectedPage] = useState(null);
-  const [editedContent, setEditedContent] = useState('');
+import ManageContact from './ManageContact';
+import ProductCareForm from './ProductCareForm';
+import TermsAndConditionsForm from './TermsAndConditionsForm';
+import PrivacyPolicyForm from './PrivacyPolicyForm';
 
-  useEffect(() => {
-    const fetchPages = async () => {
-      try {
-        const snapshot = await getDocs(collection(db, 'StaticPages'));
-        const pagesArray = snapshot.docs.map(doc => ({
-          id: doc.id,
-          ...doc.data(),
-        }));
-        setPages(pagesArray);
-      } catch (error) {
-        console.error("Error fetching pages:", error);
-        toast.error("Failed to fetch static pages.");
-      }
+
+import ConfirmModal from '../../components/ConfirmModal/ConfirmModal';
+
+
+const StaticPages = () => {
+    const [activeTab, setActiveTab] = useState('Contact');
+    const [pageContent, setPageContent] = useState({});
+
+    const [loading, setLoading] = useState(true);
+    const [error, setError] = useState(null);
+
+    const tabs = ['Contact', 'Product Care', 'Privacy Policy', 'Terms and Conditions'];
+
+    const tabToDocIdMap = {
+        'Contact': 'contact',
+        'Product Care': 'productCare',
+        'Privacy Policy': 'privacyPolicy',
+        'Terms and Conditions': 'termsAndConditions'
     };
 
-    fetchPages();
-  }, []);
+    useEffect(() => {
+        const fetchStaticPageContent = async () => {
+            setLoading(true);
+            setError(null);
+            try {
+                const querySnapshot = await getDocs(collection(db, 'staticPages'));
+                const contentMap = {};
+                querySnapshot.docs.forEach(doc => {
+                    contentMap[doc.id] = doc.data();
+                });
+                setPageContent(contentMap);
+            } catch (err) {
+                console.error("Error fetching static page content:", err);
+                setError("Failed to load page content.");
+                toast.error("Failed to load static page content.");
+            } finally {
+                setLoading(false);
+            }
+        };
+        fetchStaticPageContent();
+    }, []);
 
-  const handleSelectPage = (page) => {
-    setSelectedPage(page);
-    setEditedContent(page.content || '');
-  };
+    const handleSave = async (docId, updatedData) => {
+        try {
+            const pageRef = doc(db, 'staticPages', docId);
+            console.log(`Attempting to save for docId: ${docId}`);
+            console.log("Data to update:", updatedData);
 
-  const handleSave = async () => {
-    if (!selectedPage) return;
-    try {
-      await updateDoc(doc(db, 'StaticPages', selectedPage.id), {
-        content: editedContent,
-      });
-      toast.success(`${selectedPage.title} updated successfully!`);
-      setSelectedPage(null);
-      setEditedContent('');
-    } catch (error) {
-      console.error("Error updating page:", error);
-      toast.error("Failed to update the page.");
-    }
-  };
+            // Using setDoc with merge: true will either create the document
+            // or update existing fields without overwriting the entire document.
+            await setDoc(pageRef, updatedData, { merge: true });
 
-  return (
-    <div className="static-pages-container flex-col">
-      <h2 className="header">Edit Static Pages</h2>
-      <hr className="thick-hr" />
+            // Update the local state to reflect the saved data
+            setPageContent(prev => ({
+                ...prev,
+                [docId]: { ...prev[docId], ...updatedData }
+            }));
 
-      <div className="static-page-list">
-        {pages.map(page => (
-          <button
-            key={page.id}
-            className={`page-button ${selectedPage?.id === page.id ? 'active' : ''}`}
-            onClick={() => handleSelectPage(page)}
-          >
-            {page.title}
-          </button>
-        ))}
-      </div>
+            toast.success(`${tabs.find(key => tabToDocIdMap[key] === docId)} content updated successfully!`);
+        } catch (err) {
+            console.error(`Error updating ${docId} content:`, err);
+            toast.error(`Failed to update ${docId} content.`);
+        }
+    };
 
-      {selectedPage && (
-        <div className="editor-container">
-          <h3>{selectedPage.title}</h3>
-          <textarea
-            value={editedContent}
-            onChange={(e) => setEditedContent(e.target.value)}
-            rows={15}
-            className="content-editor"
-          />
-          <button onClick={handleSave} className="save-btn">Save Changes</button>
+    const renderTabContent = () => {
+        const docId = tabToDocIdMap[activeTab];
+        const currentData = pageContent[docId] || {};
+
+        if (loading) {
+            return <div className="tab-content loading-message">Loading content...</div>;
+        }
+
+        if (error) {
+            return <div className="tab-content error-message">Error: {error}</div>;
+        }
+
+        switch (activeTab) {
+            case 'Contact':
+                return (
+                    <ManageContact
+                        content={currentData}
+                        onSave={(data) => handleSave(docId, data)}
+                    />
+                );
+            case 'Product Care':
+                return (
+                    <ProductCareForm
+                        content={currentData}
+                        onSave={(data) => handleSave(docId, data)}
+                    />
+                );
+            case 'Privacy Policy':
+                return (
+                   <PrivacyPolicyForm
+                        content={currentData}
+                        onSave={(data) => handleSave(docId, data)}
+                    />
+                );
+            case 'Terms and Conditions':
+                return (
+                    <TermsAndConditionsForm
+                        content={currentData}
+                        onSave={(data) => handleSave(docId, data)}
+                    />
+                );
+            default:
+                return <p>Select a tab to manage content.</p>;
+        }
+    };
+
+    return (
+        <div className='list add flex-col'>
+            <p className='header'>Manage Static Pages</p>
+            <hr className="thick-hr" />
+
+            <div className="tabs-container">
+                <div className="tabs-nav">
+                    {tabs.map((tabName) => (
+                        <button
+                            key={tabName}
+                            className={`tab-button ${activeTab === tabName ? 'active' : ''}`}
+                            onClick={() => {
+                                setActiveTab(tabName);
+                            }}
+                        >
+                            {tabName}
+                        </button>
+                    ))}
+                </div>
+                <div className="tabs-content-wrapper">
+                    {renderTabContent()}
+                </div>
+            </div>
+
+            <ConfirmModal show={false} title="" message="" onConfirm={() => {}} onCancel={() => {}} />
         </div>
-      )}
-    </div>
-  );
+    );
 };
 
 export default StaticPages;

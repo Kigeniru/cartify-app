@@ -65,6 +65,7 @@ return (
       <Route path='/cart' element={<Basket/>} />
       <Route path='/myorders' element={<MyOrders/>} />
       <Route path='/placeorder' element={<PlaceOrder/>} />
+      <Route path="/delivery" element={<Delivery />} />
       <Route path='/profile' element={<ProfileSettings/>} />
 
        <Route path='/terms-and-conditions' element={<TermsAndConditions/>} />

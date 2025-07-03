@@ -1,44 +1,42 @@
 import React from "react";
 import styles from '../styles/delivery.module.css';
 import icon from "../assets/mvillo-logo.png";
+import lalamoveIcon from "../assets/lala.png";
 
 function Delivery() {
-  const handleClick = (method) => {
-    localStorage.setItem("deliveryMethod", method);
+  const handlePersonalClick = () => {
+    localStorage.setItem("deliveryMethod", "Personal Delivery");
+    window.location.href = "/location";
+  };
+
+  const handleLalamoveClick = () => {
+    localStorage.setItem("deliveryMethod", "Lalamove");
     window.location.href = "/location";
   };
 
   return (
     <div className={styles.deliveryPage}>
-      <header>
-        <div className="header-left">
-          <div className="logo">
-            <img src={icon} alt="Site Icon" />
-          </div>
-          <nav>
-            <a href="/product">Our Products</a>
-            <a href="/contact">Contact Us</a>
-          </nav>
-        </div>
-      </header>
+      {/* Styled Delivery Header */}
+      <div className={styles['cart-header']}>
+        <div className={styles['cart-header-content']}>Delivery</div>
+      </div>
 
       <main className={styles.deliveryOptions}>
-        <div className={`${styles.card} ${styles.pickup}`}>
-          <h3>Pick-Up</h3>
-          <p>Pick it up yourself from our local store.</p>
-          <button className={styles.selectButton} onClick={() => handleClick("Pick-Up")}>Select Pick-Up</button>
-        </div>
-
-        <div className={`${styles.card} ${styles.meet}`}>
-          <h3>Meet-Up</h3>
-          <p>We'll meet at a nearby location that works for both of us.</p>
-          <button className={styles.selectButton} onClick={() => handleClick("Meet-Up")}>Select Meet-Up</button>
-        </div>
-
         <div className={`${styles.card} ${styles.delivery}`}>
-          <h3>Delivery</h3>
-          <p>We'll deliver your order right to your doorstep!</p>
-          <button className={styles.selectButton} onClick={() => handleClick("Delivery")}>Select Delivery</button>
+          <img src={icon} alt="Mvillo Logo" className={styles.deliveryLogo} />
+          <h3>Personal Delivery</h3>
+          <p>Availability (Sat–Sun 9AM–9PM)</p>
+          <button className={styles.selectButton} onClick={handlePersonalClick}>
+            Select Delivery
+          </button>
+        </div>
+        <div className={`${styles.card} ${styles.lalamove}`}>
+          <img src={lalamoveIcon} alt="Lalamove Logo" className={styles.deliveryLogo} />
+          <h3>Lalamove</h3>
+          <p>Delivery via Lalamove (fees apply)</p>
+          <button className={styles.selectButton} onClick={handleLalamoveClick}>
+            Select Lalamove
+          </button>
         </div>
       </main>
     </div>

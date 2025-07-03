@@ -28,8 +28,8 @@
   }
   
   .logo img {
-    width: 45px;
-    height: 45px;
+    width: 80px;
+    height: px;
   }
   
   nav a {
@@ -133,3 +133,53 @@
     background-color: #4ec8db;
   }
   
+  .lalamove {
+    background-color: #ff6600;
+    color: #fff;
+  }
+  
+  .lalamove h3,
+  .lalamove p {
+    color: #fff;
+  }
+  
+  .lalamove .selectButton {
+    background-color: #fff;
+    color: #ff6600;
+  }
+  
+  .lalamove .selectButton:hover {
+    background-color: #ffd699;
+    color: #ff6600;
+  }
+  
+  .cart-header {
+  background-color: blueviolet;
+  color: white;
+  padding: 15px 40px;
+  display: flex;
+  align-items: center;
+  justify-content: flex-start;
+  flex-wrap: wrap;
+}
+  
+  .cart-header-content {
+    color: #fff;
+    font-size: 2.5rem;
+    font-weight: 700;
+    margin-left: 50px;
+  }
+  
+  .deliveryLogo {
+    width: 180px;
+    height: 180px;
+    object-fit: contain;
+    margin: 0 auto 20px auto;
+    display: block;
+  }
+  
+  .lalamove img.deliveryLogo {
+    background: #ff6600;
+    border-radius: 20px;
+    padding: 16px;
+  }

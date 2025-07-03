@@ -15,6 +15,11 @@ const Product = () => {
   const [categoryFilter, setCategoryFilter] = useState('');
   const navigate = useNavigate();
 
+  // --- Pagination States ---
+  const [currentPage, setCurrentPage] = useState(1);
+  const [productsPerPage] = useState(10); // Limit to 10 products per page
+  // --- END Pagination States ---
+
   // --- NEW States for ConfirmModal (for delete) ---
   const [showDeleteConfirmModal, setShowDeleteConfirmModal] = useState(false);
   const [productIdToDelete, setProductIdToDelete] = useState(null);
@@ -82,6 +87,25 @@ const Product = () => {
     navigate(`/product/edit/${productId}`);
   };
 
+  // --- Pagination Logic ---
+  // Filter and search products first
+  const filteredProducts = products.filter(product =>
+    product.name.toLowerCase().includes(search) &&
+    (categoryFilter === '' || product.category === categoryFilter)
+  );
+
+  // Get current products for the page
+  const indexOfLastProduct = currentPage * productsPerPage;
+  const indexOfFirstProduct = indexOfLastProduct - productsPerPage;
+  const currentProducts = filteredProducts.slice(indexOfFirstProduct, indexOfLastProduct);
+
+  // Calculate total pages
+  const totalPages = Math.ceil(filteredProducts.length / productsPerPage);
+
+  // Change page
+  const paginate = (pageNumber) => setCurrentPage(pageNumber);
+  // --- END Pagination Logic ---
+
   return (
     <div className='list add flex-col'>
       <div className="header-bar">
@@ -95,13 +119,19 @@ const Product = () => {
           type="text"
           placeholder="Search product..."
           className="search-input"
-          onChange={(e) => setSearch(e.target.value.toLowerCase())}
+          onChange={(e) => {
+            setSearch(e.target.value.toLowerCase());
+            setCurrentPage(1); // Reset to first page on search
+          }}
         />
 
         <select
           className="sort-select"
           value={categoryFilter}
-          onChange={(e) => setCategoryFilter(e.target.value)}
+          onChange={(e) => {
+            setCategoryFilter(e.target.value);
+            setCurrentPage(1); // Reset to first page on category filter
+          }}
         >
           <option value="">All Categories</option>
           {categories.map((cat) => (
@@ -119,44 +149,68 @@ const Product = () => {
           <b>Action</b>
         </div>
 
-        {products
-        .filter(product =>
-          product.name.toLowerCase().includes(search) &&
-          (categoryFilter === '' || product.category === categoryFilter)
-        )
-        .map((product) => (
-          // Make the entire row clickable, except for the delete button
-          <div
-            key={product.id}
-            className="list-table-format-prod clickable-row" // Add a class for styling
-            onClick={() => handleRowClick(product.id)}
-          >
-            <img
-              src={product.imageUrl}
-              alt={product.name}
-              className="product-image"
-              style={{ width: '100px', height: '100px', objectFit: 'cover' }}
-            />
-            <p>{product.name}</p>
-            <p>{product.category}</p>
-            <p>
-              ₱{Number(product.price).toLocaleString('en-PH', {
-                minimumFractionDigits: 2,
-                maximumFractionDigits: 2,
-              })}
-            </p>
-            {/* The delete button needs its own click handler to prevent row click propagation */}
-            <button
-              onClick={(e) => {
-                e.stopPropagation(); // Stop the row click from firing
-                handleDeleteClick(product.id);
-              }}
+        {currentProducts.length > 0 ? (
+          currentProducts.map((product) => (
+            <div
+              key={product.id}
+              className="list-table-format-prod clickable-row"
+              onClick={() => handleRowClick(product.id)}
             >
-              <FaTrash className='action-icon' />
-            </button>
-          </div>
-      ))}
+              <img
+                src={product.imageUrl}
+                alt={product.name}
+                className="product-image"
+                style={{ width: '100px', height: '100px', objectFit: 'cover' }}
+              />
+              <p>{product.name}</p>
+              <p>{product.category}</p>
+              <p>
+                ₱{Number(product.price).toLocaleString('en-PH', {
+                  minimumFractionDigits: 2,
+                  maximumFractionDigits: 2,
+                })}
+              </p>
+              <button
+                onClick={(e) => {
+                  e.stopPropagation();
+                  handleDeleteClick(product.id);
+                }}
+              >
+                <FaTrash className='action-icon' />
+              </button>
+            </div>
+          ))
+        ) : (
+          <p className="no-products-message">No products found.</p>
+        )}
       </div>
+
+      {/* Pagination Controls */}
+      {filteredProducts.length > productsPerPage && (
+        <div className="pagination">
+          <button
+            onClick={() => paginate(currentPage - 1)}
+            disabled={currentPage === 1}
+          >
+            Previous
+          </button>
+          {[...Array(totalPages)].map((_, index) => (
+            <button
+              key={index}
+              onClick={() => paginate(index + 1)}
+              className={currentPage === index + 1 ? 'active' : ''}
+            >
+              {index + 1}
+            </button>
+          ))}
+          <button
+            onClick={() => paginate(currentPage + 1)}
+            disabled={currentPage === totalPages}
+          >
+            Next
+          </button>
+        </div>
+      )}
 
       {/* Render the ConfirmModal for deletion */}
       <ConfirmModal

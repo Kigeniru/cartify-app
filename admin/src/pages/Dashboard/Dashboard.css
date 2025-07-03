@@ -1,0 +1,151 @@
+/* Dashboard.css */
+
+/* Base styles for the main container */
+.dashboard-container {
+    display: flex;
+    flex-direction: column;
+    padding: 24px; /* p-6 */
+    overflow-y: auto;
+    min-height: 100vh;
+    font-family: "Inter", sans-serif; /* font-inter */
+}
+
+.dashboard-title {
+    font-size: 50px;
+    font-weight: bold;
+}
+
+/* Dashboard Cards Grid */
+.dashboard-cards-grid {
+    display: grid;
+    grid-template-columns: 1fr; /* grid-cols-1 */
+    gap: 24px; /* gap-6 */
+    margin-bottom: 32px; /* mb-8 */
+}
+
+/* Responsive adjustments for cards grid */
+@media (min-width: 768px) { /* md: */
+    .dashboard-cards-grid {
+        grid-template-columns: repeat(2, 1fr); /* md:grid-cols-2 */
+    }
+}
+
+@media (min-width: 1024px) { /* lg: */
+    .dashboard-cards-grid {
+        grid-template-columns: repeat(3, 1fr); /* lg:grid-cols-3 */
+    }
+}
+
+/* Dashboard Card */
+.dashboard-card {
+    background-color: #ffffff; /* bg-white */
+    padding: 24px; /* p-6 */
+    border-radius: 12px; /* rounded-xl */
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06); /* shadow-md */
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+}
+
+.dashboard-card-title {
+    font-size: 20px; /* text-xl */
+    font-weight: 600; /* font-semibold */
+    color: #4b5563; /* text-gray-600 */
+    margin-bottom: 8px; /* mb-2 */
+}
+
+.dashboard-card-value {
+    font-size: 36px; /* text-4xl */
+    font-weight: 700; /* font-bold */
+    color: #2563eb; /* text-blue-600 */
+    margin-bottom: 8px; /* mb-2 */
+}
+
+.dashboard-card-description {
+    font-size: 14px; /* text-sm */
+    color: #6b7280; /* text-gray-500 */
+}
+
+/* Section Styling (for Sales Chart and Recent Activity) */
+.dashboard-section {
+    background-color: #ffffff; /* bg-white */
+    padding: 24px; /* p-6 */
+    border-radius: 12px; /* rounded-xl */
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06); /* shadow-md */
+    margin-bottom: 32px; /* mb-8 */
+}
+
+.dashboard-section-title {
+    font-size: 20px; /* text-xl */
+    font-weight: 600; /* font-semibold */
+    color: #1f2937; /* text-gray-800 */
+    margin-bottom: 16px; /* mb-4 */
+}
+
+/* Sales Chart Specifics */
+.sales-chart-container {
+    height: 320px; /* h-80 */
+    width: 100%; /* Ensure ResponsiveContainer works */
+}
+
+/* Recharts overrides (if needed, but usually handled by Recharts itself) */
+.recharts-cartesian-grid line {
+    stroke: #e0e0e0; /* stroke="#e0e0e0" */
+}
+
+.recharts-line-chart .recharts-line {
+    stroke: #3b82f6; /* stroke="#3b82f6" */
+    stroke-width: 2px; /* strokeWidth={2} */
+}
+
+.recharts-active-dot circle {
+    r: 8px; /* activeDot={{ r: 8 }} */
+}
+
+.recharts-tooltip-wrapper {
+    border-radius: 8px; /* borderRadius: '8px' */
+    box-shadow: 0 2px 10px rgba(0,0,0,0.1); /* boxShadow: '0 2px 10px rgba(0,0,0,0.1)' */
+}
+
+.recharts-tooltip-label {
+    font-weight: bold; /* fontWeight: 'bold' */
+    color: #333; /* color: '#333' */
+}
+
+.recharts-tooltip-item {
+    color: #666; /* color: '#666' */
+}
+
+.recharts-legend-wrapper {
+    padding-top: 10px; /* paddingTop: '10px' */
+}
+
+/* Recent Activity List */
+.recent-activity-list {
+    list-style: none; /* Remove default list bullets */
+    padding: 0;
+    margin: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 12px; /* space-y-3 */
+}
+
+.recent-activity-item {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 12px; /* p-3 */
+    background-color: #f9fafb; /* bg-gray-50 */
+    border-radius: 8px; /* rounded-lg */
+}
+
+.recent-activity-text {
+    color: #374151; /* text-gray-700 */
+}
+
+.recent-activity-time {
+    font-size: 14px; /* text-sm */
+    color: #6b7280; /* text-gray-500 */
+}

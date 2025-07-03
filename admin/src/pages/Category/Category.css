@@ -1,17 +1,36 @@
+
 .header{
     font-size:35px;
     font-weight: 600;
     color:black;
 }
 
-.add-btn{
+.action-icon{
+    width:30px;
+    color:white;
+    background-color: red;
+    height:auto;
+    padding:7px;
+    border-radius: 5px;
+}
+
+.action-icon:hover{
+    
+    background-color: rgb(139, 2, 2);
+}
+
+
+.add-btn-cat{
     max-width: 200px;
     border:none;
     padding: 10px;
     background-color: black;
     color: white;
     cursor: pointer;
+ 
 }
+
+
 
 .thick-hr {
   height: 3px;
@@ -21,34 +40,44 @@
 }
 
 
-.list-table-format {
+.list-table-format-cat,
+.list-table-format-cat.title {
   display: grid;
-  grid-template-columns: 1fr 2fr 2fr 2fr; /* Adjust to match your content structure */
+  grid-template-columns: 2fr 3fr 1fr;
   align-items: center;
   gap: 10px;
   padding: 12px 15px;
   border: 1px solid #cacaca;
   font-size: 13px;
 }
-.list-table-format:not(.title):hover {
+
+
+
+.list-table-format-cat:not(.title):hover {
   background-color: #f0f0f0;
 }
 
 
-
-.list-table-format.title{
-    background-color: #f9f9f9;
+.list-table-format-cat.title {
+  background-color: #f9f9f9;
+  font-weight: bold;
 }
 
-.list-table-format img {
+
+.list-table-format-cat img {
     width:50px;
 }
 
 .form-buttons {
   display: flex;
   gap: 10px;
+  align-items: center;
 }
 
+.cat-bar{
+    border: 1px solid gray;
+  border-radius: 4px;
+}
 
 .popup {
   position: fixed;
@@ -77,16 +106,69 @@
   margin: 10px 0;
 }
 
+/* --- NEW: Pagination (reused from Product.css, but good to have here too) --- */
+.pagination {
+  display: flex;
+  justify-content: center;
+  margin-top: 20px;
+  margin-bottom: 20px;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.pagination button {
+  background-color: #f8f9fa;
+  color: #333;
+  border: 1px solid #dee2e6;
+  padding: 8px 16px;
+  font-size: 14px;
+  cursor: pointer;
+  border-radius: 4px;
+  transition: all 0.2s ease-in-out;
+  min-width: 40px;
+  text-align: center;
+}
+
+.pagination button:hover:not(:disabled) {
+  background-color: #e9ecef;
+  border-color: #ced4da;
+  color: #0056b3;
+}
+
+.pagination button.active {
+  background-color: #007bff;
+  color: white;
+  border-color: #007bff;
+  font-weight: bold;
+  pointer-events: none;
+}
+
+.pagination button:disabled {
+  background-color: #e9ecef;
+  color: #6c757d;
+  cursor: not-allowed;
+  opacity: 0.7;
+  border-color: #dee2e6;
+}
+
+/* --- NEW: Message for No Items --- */
+.no-items-message {
+  text-align: center;
+  padding: 40px 20px;
+  color: #555;
+  font-size: 1.1em;
+  background-color: #f9f9f9;
+  border-radius: 8px;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+  margin-top: 20px;
+}
+
 
 @media (max-width:600px){
-    .list-table-format{
-        grid-template-columns: 1fr 3fr 1fr;
+    .list-table-format-cat{
+        grid-template-columns: 1fr 2fr 1fr; /* This also needs to be correct for mobile */
         gap: 15px;
     }
 
-    .list-table-format.title{
-        display: none;
-    }
-
-
+    
 }

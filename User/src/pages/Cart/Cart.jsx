@@ -2,12 +2,25 @@ import React, { useContext } from 'react';
 import './Cart.css';
 import { StoreContext } from './StoreContext';
 import { useNavigate } from 'react-router-dom';
+import { FaTrash } from "react-icons/fa";
 
 const Cart = () => {
     // Destructure the necessary functions from the context
     const { cartItems, food_list, removeFromCart, addToCart, getTotalCartAmount, removeCompletelyFromCart, clearCart } = useContext(StoreContext);
 
     const navigate = useNavigate();
+
+    // Helper function for currency formatting
+    const formatCurrency = (amount) => {
+        // Use 'en-PH' for Philippine Peso locale, and specify currency as 'PHP'
+        // You can change 'en-PH' to your desired locale if different.
+        return new Intl.NumberFormat('en-PH', {
+            style: 'currency',
+            currency: 'PHP', // Philippine Peso
+            minimumFractionDigits: 2,
+            maximumFractionDigits: 2,
+        }).format(amount);
+    };
 
     return (
         <div className='cart'>
@@ -37,11 +50,11 @@ const Cart = () => {
                                     <div key={item.id}>
                                         <div className='cart-items-title cart-items-item'>
                                             {/* Item Image */}
-                                            <img src={item.image} alt={item.name} className="cart-item-image" />
+                                            <img src={item.imageUrl} alt={item.name} className="cart-item-image" />
                                             {/* Item Name */}
                                             <p>{item.name}</p>
-                                            {/* Item Price */}
-                                            <p>₱{item.price.toFixed(2)}</p>
+                                            {/* Item Price - Formatted */}
+                                            <p>{formatCurrency(item.price)}</p>
 
                                             {/* Quantity controls: Minus, Quantity, Plus */}
                                             <div className='cart-item-quantity-control'>
@@ -50,11 +63,11 @@ const Cart = () => {
                                                 <span onClick={() => addToCart(item.id)} className='quantity-button plus-button'>+</span>
                                             </div>
 
-                                            {/* Item Total Price (Price * Quantity) */}
-                                            <p>₱{(item.price * cartItems[item.id]).toFixed(2)}</p>
-                                            
+                                            {/* Item Total Price (Price * Quantity) - Formatted */}
+                                            <p>{formatCurrency(item.price * cartItems[item.id])}</p>
+
                                             {/* 'x' to remove the item completely now */}
-                                            <p onClick={() => removeCompletelyFromCart(item.id)} className='cross'>x</p>
+                                            <p onClick={() => removeCompletelyFromCart(item.id)} className='cross'><FaTrash/></p>
                                         </div>
                                         <hr />
                                     </div>
@@ -71,17 +84,20 @@ const Cart = () => {
                             <div>
                                 <div className="cart-total-details">
                                     <p>Subtotal</p>
-                                    <p>₱{getTotalCartAmount().toFixed(2)}</p>
+                                    {/* Subtotal - Formatted */}
+                                    <p>{formatCurrency(getTotalCartAmount())}</p>
                                 </div>
                                 <hr />
                                 <div className="cart-total-details">
                                     <p>Delivery Fee</p>
-                                    <p>₱{getTotalCartAmount() === 0 ? 0 : 60}</p>
+                                    {/* Delivery Fee - Formatted */}
+                                    <p>{formatCurrency(getTotalCartAmount() === 0 ? 0 : 60)}</p>
                                 </div>
                                 <hr />
                                 <div className="cart-total-details">
                                     <b>Total</b>
-                                    <b>₱{(getTotalCartAmount() === 0 ? 0 : getTotalCartAmount() + 60).toFixed(2)}</b>
+                                    {/* Total - Formatted */}
+                                    <b>{formatCurrency(getTotalCartAmount() === 0 ? 0 : getTotalCartAmount() + 60)}</b>
                                 </div>
                             </div>
                             <div className="cart-total-buttons"> {/* NEW WRAPPER */}
@@ -89,7 +105,7 @@ const Cart = () => {
                                 <button onClick={() => navigate('/product')} className="continue-shopping-button">CONTINUE SHOPPING</button> {/* NEW BUTTON */}
                             </div>
                         </div>
-                        
+
                         <div className="cart-promocode">
                             <p>If you have a promo code, Enter it here</p>
                             <div className='cart-promocode-input'>

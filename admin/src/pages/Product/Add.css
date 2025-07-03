@@ -6,6 +6,13 @@
     font-size:16px;
 }
 
+.input-style{
+    max-width: 400px;
+    padding: 8px 12px;
+    font-size: 14px;
+    border: 1px solid gray;
+    border-radius: 4px;
+}
 .add form{
     display: flex;
 }
@@ -36,12 +43,13 @@
 }
 
 .add-btn{
-    max-width: 120px;
+    max-width: 200px;
     border:none;
     padding: 10px;
     background-color: black;
     color: white;
     cursor: pointer;
+    margin-bottom:100px
 }
 
 .list-table-format:not(.title):hover {
@@ -65,4 +73,83 @@
   display: flex;
   gap: 10px;
   margin-top: 20px;
+}
+
+.color-section {
+  margin-top: 20px;
+  width:70%;
+}
+.color-picker {
+  margin-top: 20px;
+}
+
+.color-picker input[type="range"] {
+  width: 100%;
+}
+
+.color-preview {
+  height: 30px;
+  border: 1px solid #ccc;
+  border-radius: 6px;
+  margin-top: 8px;
+}
+
+.rainbow-slider {
+  -webkit-appearance: none;
+  width: 100%;
+  height: 14px;
+  border-radius: 10px;
+  background: linear-gradient(
+    to right,
+    red,
+    orange,
+    yellow,
+    green,
+    cyan,
+    blue,
+    violet,
+    red
+  );
+  outline: none;
+  margin-top: 10px;
+  cursor: pointer;
+}
+
+.rainbow-slider::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 18px;
+  height: 18px;
+  background: white;
+  border: 2px solid black;
+  border-radius: 50%;
+  cursor: pointer;
+  transition: background 0.2s ease;
+}
+
+.rainbow-slider::-moz-range-thumb {
+  width: 18px;
+  height: 18px;
+  background: white;
+  border: 2px solid black;
+  border-radius: 50%;
+  cursor: pointer;
+}
+
+.color-preview {
+  height: 30px;
+  border: 1px solid #ccc;
+  border-radius: 6px;
+  margin-top: 8px;
+}
+
+.gradient-preview-container {
+  margin-top: 20px;
+}
+
+.gradient-preview {
+  height: 50px;
+  border: 1px solid #ccc;
+  border-radius: 8px;
+  margin-top: 10px;
 }

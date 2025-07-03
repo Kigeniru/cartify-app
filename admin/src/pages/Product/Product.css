@@ -4,24 +4,35 @@
     color:black;
 }
 
-.list-table-format{
-    display: flex;
-    grid-template-columns: 0.5fr 2fr 1fr 1fr 0.5fr;
-    align-items: center;
-    gap:10px;
-    padding: 12px 15px;
-    border:1px solid #cacaca;
-    font-size: 13px;
-
+.list-table-format-prod,
+.list-table-format-prod.title {
+  display: grid;
+  grid-template-columns: 1fr 1fr 1fr 1fr 1fr;
+  align-items: center;
+  gap: 10px;
+  padding: 12px 15px;
+  border: 1px solid #cacaca;
+  font-size: 13px;
 }
 
-.list-table-format.title{
-    background-color: #f9f9f9;
+
+
+.list-table-format-prod:not(.title):hover {
+  background-color: #f0f0f0;
+  cursor: pointer;
 }
 
-.list-table-format img {
+
+.list-table-format-prod.title {
+  background-color: #f9f9f9;
+  font-weight: bold;
+}
+
+
+.list-table-format-prod img {
     width:50px;
 }
+
 
 .form-buttons {
   display: flex;
@@ -76,17 +87,91 @@
   border-radius: 4px;
 }
 
+.action-icon{
+    width:30px;
+    color:white;
+    background-color: red;
+    height:auto;
+    padding:7px;
+    border-radius: 5px;
+}
+
+.action-icon:hover{
+    
+    background-color: rgb(139, 2, 2);
+}
+
+
+.pagination {
+  display: flex; /* Arranges buttons in a row */
+  justify-content: center; /* Centers the pagination buttons horizontally */
+  align-items: center; /* Vertically aligns items if they have different heights */
+  margin-top: 20px; /* Space above the pagination controls */
+  margin-bottom: 20px; /* Space below the pagination controls */
+  gap: 8px; /* Provides space between the buttons */
+  flex-wrap: wrap; /* Allows buttons to wrap to the next line on smaller screens */
+}
+
+/* Styling for individual pagination buttons */
+.pagination button {
+  background-color: #f8f9fa; /* Light background for normal buttons */
+  color: #333; /* Dark text for normal buttons */
+  border: 1px solid #dee2e6; /* Light grey border */
+  padding: 8px 16px; /* Vertical and horizontal padding */
+  font-size: 14px; /* Font size for button text */
+  cursor: pointer; /* Indicates it's clickable */
+  border-radius: 4px; /* Slightly rounded corners */
+  transition: all 0.2s ease-in-out; /* Smooth transition for hover effects */
+  min-width: 40px; /* Ensure a minimum width for consistent sizing */
+  text-align: center; /* Center text within button */
+}
+
+/* Hover effect for pagination buttons */
+.pagination button:hover:not(:disabled) {
+  background-color: #e9ecef; /* Slightly darker background on hover */
+  border-color: #ced4da; /* Slightly darker border on hover */
+  color: #0056b3; /* A common hover color for text */
+}
+
+/* Styling for the active (current) page button */
+.pagination button.active {
+  background-color: #007bff; /* Primary blue for active page */
+  color: white; /* White text for active page */
+  border-color: #007bff; /* Blue border for active page */
+  font-weight: bold; /* Make active page number bold */
+  pointer-events: none; /* Disable click on the active button */
+}
+
+/* Styling for disabled buttons (Previous/Next when at ends) */
+.pagination button:disabled {
+  background-color: #e9ecef; /* Lighter background for disabled */
+  color: #6c757d; /* Grey text for disabled */
+  cursor: not-allowed; /* Shows a 'no entry' cursor */
+  opacity: 0.7; /* Slightly transparent */
+  border-color: #dee2e6;
+}
+
+/* Optional: Add some styling for the "no products found" message */
+.no-products-message {
+  text-align: center;
+  padding: 40px 20px; /* More padding to make it stand out */
+  color: #555;
+  font-size: 1.1em;
+  background-color: #f9f9f9;
+  border-radius: 8px;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+  margin-top: 20px;
+}
+
 
 
 @media (max-width:600px){
-    .list-table-format{
-        grid-template-columns: 1fr 3fr 1fr;
+    .list-table-format-prod{
+        grid-template-columns: 1fr 1fr 1fr 1fr 1fr;
         gap: 15px;
     }
 
-    .list-table-format.title{
-        display: none;
-    }
+   
 
 
 }

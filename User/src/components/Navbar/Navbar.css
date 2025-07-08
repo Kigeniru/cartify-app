@@ -76,6 +76,7 @@
 
 .profile-section {
   position: relative;
+  transition: none;
 }
 
 .profile-dropdown {
@@ -86,7 +87,7 @@
   border: 1px solid #ddd;
   border-radius: 4px;
   z-index: 1000;
-  transition: opacity 0.2s ease;
+  
 }
 
 

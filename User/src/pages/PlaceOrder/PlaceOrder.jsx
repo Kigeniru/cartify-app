@@ -1,108 +1,266 @@
-import React, { useContext } from 'react';
+import React, { useContext, useEffect, useState } from 'react';
 import './PlaceOrder.css';
 import { StoreContext } from '../Cart/StoreContext';
+import { auth, db } from '../../firebase';
+import { doc, getDoc } from 'firebase/firestore';
 
 const PlaceOrder = () => {
-
     const { getTotalCartAmount } = useContext(StoreContext);
+    const [userDetails, setUserDetails] = useState(null);
+    const [loadingProfile, setLoadingProfile] = useState(true);
+    const [formData, setFormData] = useState({
+        firstName: '',
+        lastName: '',
+        email: '',
+        houseBuildingName: '', // New field for House/Building Name
+        street: '',
+        suburb: '',            // New field for Suburb
+        city: '',
+        state: '',
+        zipCode: '',
+        country: '',
+        phoneNumber: ''
+    });
+
+    // --- Function to fetch user data from Firestore ---
+    const fetchUserProfile = async (user) => {
+        if (!user) {
+            setUserDetails(null);
+            setLoadingProfile(false);
+            return;
+        }
+        try {
+            const docRef = doc(db, "Users", user.uid);
+            const docSnap = await getDoc(docRef);
+            if (docSnap.exists()) {
+                const data = docSnap.data();
+                setUserDetails(data);
+
+                // Extract structured delivery info
+                const deliveryComponents = data.deliveryInfo?.components || {}; // Get components or empty object
+
+                setFormData({
+                    firstName: data.firstName || '',
+                    lastName: data.lastName || '',
+                    email: user.email || '',
+                    // Prioritize house_number, then building for houseBuildingName
+                    houseBuildingName: deliveryComponents.name || deliveryComponents.building || '',
+                    street: deliveryComponents.road || '',
+                    // Prioritize suburb, then neighbourhood for suburb
+                    suburb: deliveryComponents.suburb || deliveryComponents.neighbourhood || '',
+                    city: deliveryComponents.city || deliveryComponents.town || deliveryComponents.village || '',
+                    state: deliveryComponents.state || '',
+                    zipCode: deliveryComponents.postcode || '',
+                    country: deliveryComponents.country || '',
+                    phoneNumber: data.contactInfo || ''
+                });
+            } else {
+                console.log("User data not found in Firestore.");
+                setUserDetails(null);
+                setFormData(prev => ({ ...prev, email: user.email || '' }));
+            }
+        } catch (error) {
+            console.error("Error fetching user profile:", error);
+            // Optionally show a toast error here
+        } finally {
+            setLoadingProfile(false);
+        }
+    };
+
+    // --- useEffect to listen for auth state changes and fetch profile ---
+    useEffect(() => {
+        const unsubscribe = auth.onAuthStateChanged((user) => {
+            fetchUserProfile(user);
+        });
+        return () => unsubscribe();
+    }, []);
+
+    // --- Handle input changes for the form fields ---
+    const handleInputChange = (e) => {
+        const { name, value } = e.target;
+        setFormData(prev => ({ ...prev, [name]: value }));
+    };
 
     // This function will handle the payment process using native fetch API
     const handlePayment = async (e) => {
-        // Prevent the form from submitting and reloading the page
-        e.preventDefault(); 
+        e.preventDefault();
 
-        // Step 1: Calculate the total amount in centavos (lowest currency denomination).
-        // Paymongo requires the amount to be multiplied by 100.
+        console.log("Delivery Information:", formData);
+
         const totalAmountInCentavos = (getTotalCartAmount() + 60) * 100;
-        
-        // Define your Paymongo Secret Key.
-        // NOTE: In a real production app, this should be handled on a backend server for security.
-        // Exposing it in the frontend is a security risk.
+
         const SECRET_KEY = 'sk_test_FJtrQAYD82Jp8B1uMA37qYFr';
-        
-        // Encode the secret key for Basic Authentication (username:password -> sk_test_...: )
         const basicAuth = btoa(SECRET_KEY + ':');
 
-        // --- Step 2: Define your success and cancel redirect URLs ---
-        // We use window.location.origin to make the URLs dynamic, so they work in both
-        // development (e.g., http://localhost:3000) and production (e.g., https://yourdomain.com).
-        // Replace '/complete' with the path to your order confirmation page.
-        // Replace '/cart' with the path to your cart/checkout page for cancellation.
-        const successRedirectUrl = `${window.location.origin}/complete`; // Example: Your order complete page
-        const cancelRedirectUrl = `${window.location.origin}/cart`;     // Example: Redirect back to the cart
+        const successRedirectUrl = `${window.location.origin}/complete`;
+        const cancelRedirectUrl = `${window.location.origin}/cart`;
 
-        // Step 3: Make the API call to Paymongo using fetch.
         try {
             const response = await fetch('https://api.paymongo.com/v1/links', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
                     'Accept': 'application/json',
-                    // Use the encoded key for Authorization
                     'Authorization': `Basic ${basicAuth}`
                 },
-                // The request body must be a JSON string.
                 body: JSON.stringify({
                     data: {
                         attributes: {
-                            amount: totalAmountInCentavos, 
-                            description: 'Online Food Order', 
+                            amount: totalAmountInCentavos,
+                            description: 'Online Food Order',
                             remarks: 'Order from Cartify App',
-                            // --- Add the redirect URLs here ---
                             success_url: successRedirectUrl,
-                            cancel_url: cancelRedirectUrl
+                            cancel_url: cancelRedirectUrl,
+                            // You can pass customer details here if Paymongo supports it
+                            // based on the formData
+                            // customer_details: {
+                            //     email: formData.email,
+                            //     first_name: formData.firstName,
+                            //     last_name: formData.lastName,
+                            //     phone: formData.phoneNumber,
+                            //     shipping: {
+                            //         address: {
+                            //             line1: formData.street,
+                            //             line2: formData.houseBuildingName, // Potentially use for line2
+                            //             city: formData.city,
+                            //             state: formData.state,
+                            //             postal_code: formData.zipCode,
+                            //             country: formData.country,
+                            //         },
+                            //         name: `${formData.firstName} ${formData.lastName}`,
+                            //     }
+                            // }
                         }
                     }
                 })
             });
 
-            // Parse the JSON response
             const data = await response.json();
 
-            // Step 4: Check if the response was successful (HTTP status 200-299).
             if (response.ok) {
                 console.log("Paymongo Link created successfully:", data);
-                
-                // Step 5: Redirect the user to the Paymongo checkout page.
-                // Paymongo will handle the final redirect back to your site from there.
                 if (data.data.attributes.checkout_url) {
                     window.location.href = data.data.attributes.checkout_url;
                 } else {
                     console.error("No checkout URL found in the response.", data);
-                    alert("Failed to get payment link. Please check the console for details.");
+                    console.log("Failed to get payment link. Please check the console for details.");
                 }
             } else {
-                // If the response is not OK (e.g., 401 Unauthorized, 400 Bad Request)
                 console.error("Paymongo API Error:", data.errors);
-                alert(`Payment processing failed. Error: ${data.errors?.[0]?.detail || 'Unknown error'}`);
+                console.log(`Payment processing failed. Error: ${data.errors?.[0]?.detail || 'Unknown error'}`);
             }
 
         } catch (err) {
-            // This catches network errors (e.g., no internet connection).
             console.error("Network or Unexpected Error:", err);
-            alert("Payment processing failed due to a network error. Please try again.");
+            console.log("Payment processing failed due to a network error. Please try again.");
         }
     };
+
+    if (loadingProfile) {
+        return (
+            <div className="place-order-loading text-center p-8">
+                <p>Loading delivery information...</p>
+            </div>
+        );
+    }
 
     return (
         <form className='place-order' onSubmit={handlePayment}>
             <div className="place-order-left">
                 <p className="title">Delivery Information</p>
                 <div className="multi-fields">
-                    <input type="text" placeholder='First Name' required />
-                    <input type="text" placeholder='Last Name' required />
+                    <input
+                        type="text"
+                        placeholder='First Name'
+                        name="firstName"
+                        value={formData.firstName}
+                        onChange={handleInputChange}
+                        required
+                    />
+                    <input
+                        type="text"
+                        placeholder='Last Name'
+                        name="lastName"
+                        value={formData.lastName}
+                        onChange={handleInputChange}
+                        required
+                    />
                 </div>
-                <input type="email" placeholder='Email Address' required />
-                <input type="text" placeholder='Street' required />
+                <input
+                    type="email"
+                    placeholder='Email Address'
+                    name="email"
+                    value={formData.email}
+                    onChange={handleInputChange}
+                    required
+                    readOnly
+                />
+                <input
+                    type="text"
+                    placeholder='House/Building Name' // New input field
+                    name="houseBuildingName"
+                    value={formData.houseBuildingName}
+                    onChange={handleInputChange}
+                />
+                <input
+                    type="text"
+                    placeholder='Street'
+                    name="street"
+                    value={formData.street}
+                    onChange={handleInputChange}
+                    required
+                />
+                <input
+                    type="text"
+                    placeholder='Suburb' // New input field
+                    name="suburb"
+                    value={formData.suburb}
+                    onChange={handleInputChange}
+                />
                 <div className="multi-fields">
-                    <input type="text" placeholder='City' required />
-                    <input type="text" placeholder='State' required />
+                    <input
+                        type="text"
+                        placeholder='City'
+                        name="city"
+                        value={formData.city}
+                        onChange={handleInputChange}
+                        required
+                    />
+                    <input
+                        type="text"
+                        placeholder='State'
+                        name="state"
+                        value={formData.state}
+                        onChange={handleInputChange}
+                        required
+                    />
                 </div>
                 <div className="multi-fields">
-                    <input type="text" placeholder='Zip Code' required />
-                    <input type="text" placeholder='Country' required />
+                    <input
+                        type="text"
+                        placeholder='Zip Code'
+                        name="zipCode"
+                        value={formData.zipCode}
+                        onChange={handleInputChange}
+                        required
+                    />
+                    <input
+                        type="text"
+                        placeholder='Country'
+                        name="country"
+                        value={formData.country}
+                        onChange={handleInputChange}
+                        required
+                    />
                 </div>
-                <input type="text" placeholder='Phone Number' required />
+                <input
+                    type="text"
+                    placeholder='Phone Number'
+                    name="phoneNumber"
+                    value={formData.phoneNumber}
+                    onChange={handleInputChange}
+                    required
+                />
             </div>
             <div className="place-order-right">
                 <div className="cart-total">
@@ -124,7 +282,7 @@ const PlaceOrder = () => {
                         </div>
                     </div>
                     <button type="submit">PROCEED TO PAYMENT</button>
-                </div> 
+                </div>
             </div>
         </form>
     );

@@ -58,23 +58,7 @@ const Dashboard = () => {
       </section>
 
       {/* Recent Activity Section */}
-      <section className="dashboard-section">
-        <h3 className="dashboard-section-title">Recent Activity</h3>
-        <ul className="recent-activity-list">
-          <li className="recent-activity-item">
-            <span className="recent-activity-text">Order #MVL-001 placed by Jane Doe</span>
-            <span className="recent-activity-time">2 mins ago</span>
-          </li>
-          <li className="recent-activity-item">
-            <span className="recent-activity-text">New product "Ube Leche Flan" added</span>
-            <span className="recent-activity-time">1 hour ago</span>
-          </li>
-          <li className="recent-activity-item">
-            <span className="recent-activity-text">Customer review received for Classic Leche Flan</span>
-            <span className="recent-activity-time">4 hours ago</span>
-          </li>
-        </ul>
-      </section>
+      
     </div>
   );
 };

@@ -1,18 +1,27 @@
-import React, { useEffect, useState } from "react";
-import { auth, db, storage } from "../../firebase"; // Import 'storage'
+import React, { useEffect, useState, useRef } from "react";
+import { auth, db, storage } from "../../firebase";
 import { doc, getDoc, updateDoc } from "firebase/firestore";
-import { ref, uploadBytes, getDownloadURL } from "firebase/storage"; // Import Storage functions
+import { ref, uploadBytes, getDownloadURL } from "firebase/storage";
 import { toast } from "react-toastify";
-// import Autocomplete from "react-google-autocomplete"; // Autocomplete not used in the provided code, so commented out
+import axios from "axios";
+// IMPORTANT: Replace this with the actual path to your ConfirmModal component
+import ConfirmModal from '../../components/ConfirmModal/ConfirmModal'; 
+
+
+// Your LocationIQ API Key - IMPORTANT: In a real application, consider using environment variables (e.g., process.env.REACT_APP_LOCATIONIQ_API_KEY)
+const LOCATIONIQ_API_KEY = "pk.4646f3385635007025a49229e5e34a4e"; // Replace with your actual key
 
 function Profile() {
   const [userDetails, setUserDetails] = useState(null);
   const [editFormData, setEditFormData] = useState({});
   const [hasChanges, setHasChanges] = useState(false);
-  const [selectedImage, setSelectedImage] = useState(null); // State for the selected image file
+  const [selectedImage, setSelectedImage] = useState(null);
+  const [addressSuggestions, setAddressSuggestions] = useState([]);
+  const [showSuggestions, setShowSuggestions] = useState(false);
+  const debounceTimeoutRef = useRef(null);
+  const [showConfirmModal, setShowConfirmModal] = useState(false); // New state for confirm modal
 
   // --- Helper function to fetch and set user data ---
-  // This function is now just a helper, not directly wrapped in the useEffect return.
   const fetchAndSetUserData = async (user) => {
     try {
       const docRef = doc(db, "Users", user.uid);
@@ -20,13 +29,18 @@ function Profile() {
       if (docSnap.exists()) {
         const data = docSnap.data();
         setUserDetails(data);
-        setEditFormData(data);
+        // Ensure deliveryInfo is an object, even if it was previously a string
+        const deliveryInfo = typeof data.deliveryInfo === 'string'
+          ? { fullAddress: data.deliveryInfo, components: {} } // Convert old string format
+          : data.deliveryInfo || { fullAddress: '', components: {} }; // Default to empty object
+        
+        setEditFormData({ ...data, deliveryInfo }); // Set editFormData with the normalized deliveryInfo
         setHasChanges(false);
-        setSelectedImage(null); // Clear selected image on new data load
+        setSelectedImage(null);
       } else {
         console.log("User data not found in Firestore.");
         setUserDetails(null);
-        setEditFormData({});
+        setEditFormData({ deliveryInfo: { fullAddress: '', components: {} } }); // Initialize deliveryInfo as object
         setHasChanges(false);
         setSelectedImage(null);
       }
@@ -38,59 +52,130 @@ function Profile() {
 
   // --- useEffect for fetching user data and setting up auth state listener ---
   useEffect(() => {
-    // onAuthStateChanged returns an unsubscribe function.
     const unsubscribe = auth.onAuthStateChanged((user) => {
       if (user) {
-        // If a user is logged in, fetch their data
         fetchAndSetUserData(user);
       } else {
-        // If no user is logged in, clear state
         console.log("No user is logged in.");
         setUserDetails(null);
-        setEditFormData({});
+        setEditFormData({ deliveryInfo: { fullAddress: '', components: {} } }); // Initialize deliveryInfo as object
         setHasChanges(false);
         setSelectedImage(null);
-        // window.location.href = "/login"; // Optional: Redirect if not logged in
       }
     });
 
-    // Return the unsubscribe function directly from useEffect.
-    // This function will be called when the component unmounts.
     return () => unsubscribe();
-  }, []); // Empty dependency array means this effect runs once on mount and cleans up on unmount
+  }, []);
 
-  // --- Handle Input Changes (for text fields) ---
+  // --- Handle Input Changes (for text fields, including deliveryInfo) ---
   const handleChange = (e) => {
     const { name, value } = e.target;
     setEditFormData((prevData) => {
-      const newData = { ...prevData, [name]: value };
-      // Check if new data differs from original userDetails to set hasChanges
-      // This ensures 'hasChanges' reflects only text field changes, not just image selection
+      let newData;
+      if (name === "deliveryInfo") {
+        // When deliveryInfo is typed manually, update fullAddress and clear components
+        newData = {
+          ...prevData,
+          deliveryInfo: {
+            fullAddress: value,
+            components: {} // Clear components if user is typing manually
+          }
+        };
+      } else {
+        newData = { ...prevData, [name]: value };
+      }
+
       const textChangesMade = userDetails
         ? Object.keys(newData).some(
-            (key) => newData[key] !== userDetails[key] && key !== "photo" // Exclude photo as it's handled separately
+            (key) => {
+              if (key === "deliveryInfo") {
+                // Compare fullAddress for deliveryInfo
+                return newData.deliveryInfo.fullAddress !== (userDetails.deliveryInfo?.fullAddress || '');
+              }
+              return newData[key] !== userDetails[key] && key !== "photo";
+            }
           )
         : false;
-      setHasChanges(textChangesMade || !!selectedImage); // Set true if text changes OR an image is selected
+      setHasChanges(textChangesMade || !!selectedImage);
       return newData;
     });
+
+    // If the changed field is deliveryInfo, trigger autocomplete
+    if (name === "deliveryInfo" && value.length > 2) {
+      if (debounceTimeoutRef.current) {
+        clearTimeout(debounceTimeoutRef.current);
+      }
+      debounceTimeoutRef.current = setTimeout(() => {
+        fetchAddressSuggestions(value);
+      }, 500); // Debounce for 500ms
+    } else if (name === "deliveryInfo" && value.length <= 2) {
+      setAddressSuggestions([]);
+      setShowSuggestions(false);
+    }
+  };
+
+  // --- Function to fetch address suggestions from LocationIQ ---
+  const fetchAddressSuggestions = async (query) => {
+    try {
+      const response = await axios.get(
+        `https://us1.locationiq.com/v1/autocomplete.php`,
+        {
+          params: {
+            key: LOCATIONIQ_API_KEY,
+            q: query,
+            limit: 5,
+            dedupe: 1,
+            addressdetails: 1, // <--- IMPORTANT: Request detailed address components
+            // countrycodes: 'ph' // Uncomment if you want to restrict to Philippines
+          },
+        }
+      );
+      if (response.data && Array.isArray(response.data)) {
+        setAddressSuggestions(response.data);
+        setShowSuggestions(true);
+      } else {
+        setAddressSuggestions([]);
+        setShowSuggestions(false);
+      }
+    } catch (error) {
+      console.error("Error fetching address suggestions:", error);
+      setAddressSuggestions([]);
+      setShowSuggestions(false);
+    }
+  };
+
+  // --- Handle selection of an address suggestion ---
+  const handleSelectSuggestion = (suggestion) => {
+    setEditFormData((prevData) => ({
+      ...prevData,
+      deliveryInfo: {
+        fullAddress: suggestion.display_name,
+        components: suggestion.address || {} // Store the structured address object
+      },
+    }));
+    setAddressSuggestions([]);
+    setShowSuggestions(false);
+    setHasChanges(true); // Mark as having changes
   };
 
   // --- Handle Image File Selection ---
   const handleImageFileChange = (e) => {
     if (e.target.files[0]) {
       setSelectedImage(e.target.files[0]);
-      // Mark as having changes if an image is selected
       setHasChanges(true);
     } else {
       setSelectedImage(null);
-      // Re-evaluate hasChanges if image selection is cleared
       const textChangesMade = userDetails
         ? Object.keys(editFormData).some(
-            (key) => editFormData[key] !== userDetails[key] && key !== "photo"
+            (key) => {
+              if (key === "deliveryInfo") {
+                return editFormData.deliveryInfo.fullAddress !== (userDetails.deliveryInfo?.fullAddress || '');
+              }
+              return editFormData[key] !== userDetails[key] && key !== "photo";
+            }
           )
         : false;
-      setHasChanges(textChangesMade); // Set true only if text changes exist
+      setHasChanges(textChangesMade);
     }
   };
 
@@ -108,7 +193,6 @@ function Profile() {
     }
 
     const user = auth.currentUser;
-    // Create a unique path for the image using user UID and current timestamp
     const imageRef = ref(
       storage,
       `profile_photos/${user.uid}/${Date.now()}_${selectedImage.name}`
@@ -121,45 +205,45 @@ function Profile() {
         autoClose: false,
         closeButton: false,
       });
-      // Upload the image
       const snapshot = await uploadBytes(imageRef, selectedImage);
-      // Get the download URL
       const photoURL = await getDownloadURL(snapshot.ref);
 
-      // Update Firestore user document with the new photo URL
       await updateDoc(userDocRef, {
         photo: photoURL,
       });
 
-      // Update local state to reflect new photo instantly
       setUserDetails((prevDetails) => ({
         ...prevDetails,
         photo: photoURL,
       }));
-      setSelectedImage(null); // Clear selected image after successful upload
-      // Re-evaluate hasChanges for text fields after photo upload
+      setSelectedImage(null);
       const textChangesMade = userDetails
         ? Object.keys(editFormData).some(
-            (key) => editFormData[key] !== userDetails[key] && key !== "photo"
+            (key) => {
+              if (key === "deliveryInfo") {
+                return editFormData.deliveryInfo.fullAddress !== (userDetails.deliveryInfo?.fullAddress || '');
+              }
+              return editFormData[key] !== userDetails[key] && key !== "photo";
+            }
           )
         : false;
-      setHasChanges(textChangesMade); // Reset changes, as photo change is now saved
+      setHasChanges(textChangesMade);
 
-      toast.dismiss(); // Dismiss the 'uploading' toast
+      toast.dismiss();
       toast.success("Profile picture updated successfully!", {
         position: "top-center",
       });
     } catch (error) {
       console.error("Error uploading photo:", error);
-      toast.dismiss(); // Dismiss the 'uploading' toast
+      toast.dismiss();
       toast.error("Failed to upload photo: " + error.message, {
         position: "top-center",
       });
     }
   };
 
-  // --- Handle Saving Profile Changes (text fields) ---
-  const handleSave = async () => {
+  // --- Handle Saving Profile Changes (initiates modal) ---
+  const handleSave = () => {
     if (!auth.currentUser) {
       toast.error("You must be logged in to save changes.", {
         position: "top-center",
@@ -167,10 +251,21 @@ function Profile() {
       return;
     }
 
-    // Check if there are actual text changes
     const textChangesExist = userDetails
       ? Object.keys(editFormData).some(
-          (key) => editFormData[key] !== userDetails[key] && key !== "photo" // Exclude photo
+          (key) => {
+            if (key === "deliveryInfo") {
+              const oldFullAddress = userDetails.deliveryInfo?.fullAddress || '';
+              const newFullAddress = editFormData.deliveryInfo?.fullAddress || '';
+              const oldComponents = userDetails.deliveryInfo?.components || {};
+              const newComponents = editFormData.deliveryInfo?.components || {};
+              return (
+                oldFullAddress !== newFullAddress ||
+                JSON.stringify(oldComponents) !== JSON.stringify(newComponents)
+              );
+            }
+            return editFormData[key] !== userDetails[key] && key !== "photo";
+          }
         )
       : false;
 
@@ -179,16 +274,24 @@ function Profile() {
       return;
     }
 
+    setShowConfirmModal(true); // Show the confirmation modal
+  };
+
+  // --- Handle Confirm Save (actual save logic) ---
+  const handleConfirmSave = async () => {
+    setShowConfirmModal(false); // Close the modal
+
     try {
       const userDocRef = doc(db, "Users", auth.currentUser.uid);
-      await updateDoc(userDocRef, {
+      const dataToSave = {
         firstName: editFormData.firstName,
         lastName: editFormData.lastName,
         contactInfo: editFormData.contactInfo,
         deliveryInfo: editFormData.deliveryInfo,
-      });
-      setUserDetails(editFormData); // Update displayed details with the new form data
-      setHasChanges(false); // Reset changes flag for text fields
+      };
+      await updateDoc(userDocRef, dataToSave);
+      setUserDetails(dataToSave);
+      setHasChanges(false);
       toast.success("Profile details updated successfully!", {
         position: "top-center",
       });
@@ -200,22 +303,33 @@ function Profile() {
     }
   };
 
-  // --- Handle Cancelling Changes ---
+  // --- Handle Cancel Save (from modal) ---
+  const handleCancelSave = () => {
+    setShowConfirmModal(false); // Just close the modal
+  };
+
+  // --- Handle Cancelling Changes (from main form) ---
   const handleCancel = () => {
-    setEditFormData(userDetails); // Revert text fields to original data
-    setSelectedImage(null); // Clear any selected image
-    setHasChanges(false); // No changes anymore
+    const originalDeliveryInfo = typeof userDetails.deliveryInfo === 'string'
+      ? { fullAddress: userDetails.deliveryInfo, components: {} }
+      : userDetails.deliveryInfo || { fullAddress: '', components: {} };
+
+    setEditFormData({ ...userDetails, deliveryInfo: originalDeliveryInfo });
+    setSelectedImage(null);
+    setHasChanges(false);
+    setAddressSuggestions([]);
+    setShowSuggestions(false);
     toast.info("Changes discarded.", { position: "top-center" });
   };
 
   // --- Render Logic ---
   return (
-    <div className="flex flex-col items-center justify-center min-h-screen bg-gray-100 p-4">
+    <div className="flex flex-col items-center justify-center min-h-screen bg-gray-50 p-4 font-sans antialiased">
       {userDetails ? (
         <div className="flex flex-col md:flex-row items-start gap-8 w-full max-w-4xl">
           {/* Profile Photo Card */}
-          <div className="bg-white p-8 rounded-lg shadow-xl w-full md:w-1/3 flex-shrink-0 text-center">
-            <h3 className="text-xl font-semibold text-gray-800 mb-6 border-b pb-4">
+          <div className="bg-white p-8 rounded-xl shadow-lg w-full md:w-1/3 flex-shrink-0 text-center">
+            <h3 className="text-xl font-semibold text-gray-800 mb-6 border-b border-gray-200 pb-4">
               Profile Photo
             </h3>
             <div className="flex justify-center mb-6">
@@ -223,37 +337,37 @@ function Profile() {
                 src={
                   selectedImage
                     ? URL.createObjectURL(selectedImage)
-                    : userDetails.photo || "https://via.placeholder.com/150"
+                    : userDetails.photo || "https://placehold.co/150x150/E0E7FF/4F46E5?text=Profile"
                 }
                 alt="Profile"
-                className="w-40 h-40 rounded-full object-cover border-4 border-blue-500 shadow-md"
+                className="w-40 h-40 rounded-full object-cover border-4 border-blue-400 shadow-md"
               />
             </div>
             <input
               type="file"
               id="profileImageInput"
               accept="image/*"
-              style={{ display: "none" }} // Hide the default file input
+              style={{ display: "none" }}
               onChange={handleImageFileChange}
             />
             <label
               htmlFor="profileImageInput"
-              className="bg-blue-500 hover:bg-blue-600 text-white font-bold py-2 px-4 rounded cursor-pointer mb-2 inline-block w-full"
+              className="bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded-lg cursor-pointer mb-2 inline-block w-full transition duration-200 ease-in-out"
             >
               Select Image
             </label>
             {selectedImage && (
               <button
-                className="bg-purple-500 hover:bg-purple-600 text-white font-bold py-2 px-4 rounded w-full mt-2"
+                className="bg-indigo-500 hover:bg-indigo-600 text-white font-bold py-2 px-4 rounded-lg w-full mt-2 transition duration-200 ease-in-out"
                 onClick={handleUploadPhoto}
               >
-                Upload Photo
+                Set Profile Photo
               </button>
             )}
           </div>
 
           {/* User Details Card */}
-          <div className="bg-white p-8 rounded-lg shadow-xl w-full md:w-2/3 flex-grow">
+          <div className="bg-white p-8 rounded-xl shadow-lg w-full md:w-2/3 flex-grow">
             <h3 className="text-2xl font-bold text-gray-800 mb-2">
               Welcome {userDetails.firstName || "User"}!
             </h3>
@@ -262,11 +376,11 @@ function Profile() {
               {auth.currentUser?.email || "N/A"}
             </p>
 
-            <div className="space-y-4">
+            <div className="space-y-5">
               <div className="mb-4">
                 <label
                   htmlFor="firstName"
-                  className="block text-gray-700 text-sm font-bold mb-2"
+                  className="block text-gray-700 text-sm font-semibold mb-2"
                 >
                   First Name:
                 </label>
@@ -276,14 +390,14 @@ function Profile() {
                   name="firstName"
                   value={editFormData.firstName || ""}
                   onChange={handleChange}
-                  className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  className="appearance-none border border-gray-300 rounded-md w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:ring-2 focus:ring-blue-400 focus:border-transparent transition duration-200 ease-in-out"
                 />
               </div>
 
               <div className="mb-4">
                 <label
                   htmlFor="lastName"
-                  className="block text-gray-700 text-sm font-bold mb-2"
+                  className="block text-gray-700 text-sm font-semibold mb-2"
                 >
                   Last Name:
                 </label>
@@ -293,14 +407,14 @@ function Profile() {
                   name="lastName"
                   value={editFormData.lastName || ""}
                   onChange={handleChange}
-                  className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  className="appearance-none border border-gray-300 rounded-md w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:ring-2 focus:ring-blue-400 focus:border-transparent transition duration-200 ease-in-out"
                 />
               </div>
 
               <div className="mb-4">
                 <label
                   htmlFor="contactInfo"
-                  className="block text-gray-700 text-sm font-bold mb-2"
+                  className="block text-gray-700 text-sm font-semibold mb-2"
                 >
                   Contact Number:
                 </label>
@@ -310,14 +424,14 @@ function Profile() {
                   name="contactInfo"
                   value={editFormData.contactInfo || ""}
                   onChange={handleChange}
-                  className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  className="appearance-none border border-gray-300 rounded-md w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:ring-2 focus:ring-blue-400 focus:border-transparent transition duration-200 ease-in-out"
                 />
               </div>
 
-              <div className="mb-4">
+              <div className="mb-4 relative">
                 <label
                   htmlFor="deliveryInfo"
-                  className="block text-gray-700 text-sm font-bold mb-2"
+                  className="block text-gray-700 text-sm font-semibold mb-2"
                 >
                   Delivery Information:
                 </label>
@@ -325,31 +439,44 @@ function Profile() {
                   type="text"
                   id="deliveryInfo"
                   name="deliveryInfo"
-                  value={editFormData.deliveryInfo || ""}
+                  value={editFormData.deliveryInfo?.fullAddress || ""}
                   onChange={handleChange}
-                  className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  onFocus={() => setShowSuggestions(true)}
+                  onBlur={() => setTimeout(() => setShowSuggestions(false), 200)}
+                  className="appearance-none border border-gray-300 rounded-md w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:ring-2 focus:ring-blue-400 focus:border-transparent transition duration-200 ease-in-out"
                 />
+                {showSuggestions && addressSuggestions.length > 0 && (
+                  <ul className="absolute z-10 w-full bg-white border border-gray-300 rounded-md shadow-lg mt-1 max-h-60 overflow-y-auto">
+                    {addressSuggestions.map((suggestion) => (
+                      <li
+                        key={suggestion.place_id}
+                        onMouseDown={() => handleSelectSuggestion(suggestion)}
+                        className="p-2 cursor-pointer hover:bg-gray-100 border-b border-gray-200 last:border-b-0 text-gray-800"
+                      >
+                        {suggestion.display_name}
+                      </li>
+                    ))}
+                  </ul>
+                )}
               </div>
 
-              <div className="flex flex-col space-y-3 mt-6">
-                {/* Save Changes button - only enables if there are text changes OR an image is selected */}
+              <div className="flex justify-end space-x-4 mt-6">
                 <button
-                  className={`font-bold py-2 px-4 rounded focus:outline-none focus:ring-2 focus:ring-opacity-50 ${
-                    hasChanges
-                      ? "bg-green-500 hover:bg-green-600 text-white focus:ring-green-500"
-                      : "bg-gray-300 text-gray-600 cursor-not-allowed"
-                  }`}
-                  onClick={handleSave}
-                  disabled={!hasChanges} // Enable if 'hasChanges' is true
-                >
-                  Save Changes
-                </button>
-                {/* Cancel button - always visible */}
-                <button
-                  className="bg-gray-400 hover:bg-gray-500 text-white font-bold py-2 px-4 rounded focus:outline-none focus:ring-2 focus:ring-gray-400 focus:ring-opacity-50"
+                  className="bg-gray-400 hover:bg-gray-500 text-white font-bold py-2 px-4 rounded-lg focus:outline-none focus:ring-2 focus:ring-gray-400 focus:ring-opacity-50 transition duration-200 ease-in-out w-full md:w-auto"
                   onClick={handleCancel}
                 >
                   Cancel
+                </button>
+                <button
+                  className={`font-bold py-2 px-4 rounded-lg focus:outline-none focus:ring-2 focus:ring-opacity-50 transition duration-200 ease-in-out w-full md:w-auto ${
+                    hasChanges
+                      ? "bg-green-600 hover:bg-green-700 text-white focus:ring-green-500"
+                      : "bg-gray-300 text-gray-600 cursor-not-allowed"
+                  }`}
+                  onClick={handleSave} // This now triggers the modal
+                  disabled={!hasChanges}
+                >
+                  Update Profile
                 </button>
               </div>
             </div>
@@ -360,6 +487,14 @@ function Profile() {
           Loading profile...
         </p>
       )}
+
+      {/* Confirmation Modal */}
+      <ConfirmModal
+        show={showConfirmModal}
+        message="Are you sure you want to update your profile details?"
+        onConfirm={handleConfirmSave}
+        onCancel={handleCancelSave}
+      />
     </div>
   );
 }

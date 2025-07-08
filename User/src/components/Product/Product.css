@@ -1,19 +1,183 @@
-/* Base Styles */
+/* src/pages/Product.css */
+
+/* Overall page wrapper for centering and top margin */
+.product-page-wrapper {
+    margin-top: 100px;
+    padding: 20px;
+    max-width: 1250px; /* This max-width allows up to 4 cards to fit if screen is wide enough */
+    margin-left: auto;
+    margin-right: auto;
+}
+
+/* Styles for the search and sort controls container */
+.product-controls {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 15px;
+    flex-wrap: wrap;
+    margin-bottom: 30px;
+    padding: 0 10px;
+}
+
+/* Styles for the search input field */
+.product-search-input {
+    padding: 10px 15px;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+    font-size: 1rem;
+    width: 100%;
+    max-width: 300px;
+    box-shadow: inset 0 1px 3px rgba(0,0,0,0.05);
+    transition: border-color 0.3s ease, box-shadow 0.3s ease;
+}
+
+.product-search-input:focus {
+    border-color: tomato;
+    box-shadow: 0 0 0 2px rgba(255, 99, 71, 0.2);
+    outline: none;
+}
+
+/* Styles for the sort dropdown */
+.product-sort-select {
+    padding: 10px 15px;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+    font-size: 1rem;
+    background-color: white;
+    cursor: pointer;
+    appearance: none;
+    -webkit-appearance: none;
+    -moz-appearance: none;
+    background-image: url('data:image/svg+xml;utf8,<svg fill="%23333333" height="24" viewBox="0 0 24 24" width="24" xmlns="http://www.w3.org/2000/svg"><path d="M7 10l5 5 5-5z"/><path d="M0 0h24v24H0z" fill="none"/></svg>');
+    background-repeat: no-repeat;
+    background-position: right 10px center;
+    background-size: 20px;
+    transition: border-color 0.3s ease, box-shadow 0.3s ease;
+}
+
+.product-sort-select:hover {
+    border-color: #999;
+}
+
+.product-sort-select:focus {
+    border-color: tomato;
+    box-shadow: 0 0 0 2px rgba(255, 99, 71, 0.2);
+    outline: none;
+}
+
+/* Style for new category display on card */
+.product-category {
+    font-size: 1rem;
+    color: #777;
+    margin-bottom: 5px;
+    transition: color 0.4s ease;
+}
+
+/* Ensure category text also changes color on hover */
+.product-card:hover .product-category {
+    color: white;
+}
+
+/* Styles for messages (loading, error, no products found) */
+.loading-message,
+.no-products-message,
+.error-message {
+    text-align: center;
+    padding: 50px;
+    font-size: 1.5rem;
+    color: #888;
+}
+
+/* Best Seller specific styles */
+.product-card.best-seller {
+    border: 2px solid gold;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+}
+
+.product-card.best-seller::before {
+    content: '';
+    position: absolute;
+    top: 10px;
+    left: 10px;
+    width: 40px;
+    height: 40px;
+    background-color: gold;
+    border-radius: 50%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 10;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.3);
+    background-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="white" stroke="white" stroke-width="0" stroke-linecap="round" stroke-linejoin="round"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>');
+    background-size: 60%;
+    background-repeat: no-repeat;
+    background-position: center;
+}
+
+/* Optional: Make the best-seller card's hover effect slightly unique */
+.product-card.best-seller:hover {
+    box-shadow: 0 10px 25px rgba(0, 0, 0, 0.3), 0 0 0 3px gold;
+    transform: scale(1.06);
+}
+
+/* UNAVAILABLE Feature Styles (previously "Sold Out") */
+.product-card.sold-out { /* Class name remains 'sold-out' for consistency with JS, but styled for 'unavailable' */
+    opacity: 0.6; /* Dim the card */
+    pointer-events: none; /* Disable all clicks/interactions on the card itself */
+    filter: grayscale(80%); /* Make it look desaturated */
+}
+
+.sold-out-overlay { /* Class name remains 'sold-out-overlay' but displays 'UNAVAILABLE' */
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.5); /* Semi-transparent black overlay */
+    color: white;
+    font-size: 2em;
+    font-weight: bold;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 5; /* Above content, below best-seller star */
+    border-radius: 20px; /* Match card border-radius */
+    text-shadow: 2px 2px 4px rgba(0,0,0,0.5);
+    letter-spacing: 2px;
+}
+
+/* Style for disabled "View Details" button */
+.view-details button:disabled {
+    background-color: #ccc; /* Grey out the button */
+    color: #666;
+    cursor: not-allowed;
+    transform: none; /* Remove hover transform */
+    box-shadow: none;
+}
+
+.view-details button:disabled:hover {
+    background-color: #ccc; /* No change on hover for disabled */
+}
+
+
+/* Base Styles for Product Cards */
 .product-container {
   display: flex;
   gap: 30px;
   justify-content: center;
-  flex-wrap: wrap;
+  flex-wrap: wrap; /* Retains natural wrapping behavior */
   padding: 40px;
 }
 
 .product-card {
   position: relative;
   background-color: var(--default-bg, #f5f5f5);
-  transition: transform 0.3s ease, background 0.4s ease, box-shadow 0.3s ease;
+  /* Added opacity and filter to transition for the 'sold-out' effect */
+  transition: transform 0.3s ease, background 0.4s ease, box-shadow 0.3s ease, opacity 0.3s ease, filter 0.3s ease;
   padding-top: 100px;
   padding-bottom: 20px;
-  width: 280px;
+  width: 280px; /* Your original fixed width */
   border-radius: 20px;
   text-align: center;
   box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
@@ -33,7 +197,7 @@
 
 .product-card:hover {
   background: var(--hover-gradient);
-  transform: scale(1.05); /* This is correct for the card itself */
+  transform: scale(1.05);
   color: white;
   box-shadow: 0 8px 20px rgba(0, 0, 0, 0.2);
 }
@@ -51,18 +215,15 @@
   position: absolute;
   top: -40px;
   left: 50%;
-  transform: translateX(-50%); /* This is for initial positioning of the wrapper */
+  transform: translateX(-50%);
   z-index: 1;
-  /* Add transition here if image-wrapper itself moves */
-  transition: transform 0.3s ease; /* Ensure this transitions with the card's scale */
+  transition: transform 0.3s ease;
 }
 
-/* CORRECTED: Apply the scale to the image-wrapper, not just the image */
 .product-card:hover .image-wrapper {
-    transform: translateX(-50%) scale(1.1); /* Scale the wrapper, so the image scales with it */
+    transform: translateX(-50%) scale(1.1);
 }
 
-/* Ensure the image itself doesn't have an conflicting transform on hover */
 .product-image {
   width: 300px;
   height: auto;
@@ -70,7 +231,6 @@
   background-color: transparent;
   padding: 0;
   box-shadow: none;
-  /* REMOVED: transition: transform 0.3s ease; -- moved to image-wrapper */
 }
 
 
@@ -141,4 +301,44 @@
     opacity: 1;
     transform: translateY(0);
   }
+}
+
+/* Media Queries for responsiveness */
+@media (max-width: 768px) {
+    /* Responsive adjustments for controls */
+    .product-controls {
+        flex-direction: column;
+        align-items: stretch;
+    }
+
+    .product-search-input,
+    .product-sort-select {
+        max-width: none;
+        width: 100%;
+    }
+
+    /* Original .product-container media query, still relevant */
+    .product-container {
+        padding: 15px;
+    }
+
+    .product-card {
+        width: 100%;
+        max-width: 280px;
+        margin-left: auto;
+        margin-right: auto;
+    }
+
+    /* Adjust font sizes as per your original media query */
+    .product-name {
+        font-size: 2rem;
+    }
+
+    .product-price {
+        font-size: 1.3rem;
+    }
+
+    .product-description {
+        font-size: 0.85rem;
+    }
 }

@@ -2,25 +2,38 @@ import React, { useContext, useEffect, useState } from 'react';
 import './PlaceOrder.css';
 import { StoreContext } from '../Cart/StoreContext';
 import { auth, db } from '../../firebase';
-import { doc, getDoc } from 'firebase/firestore';
+import { doc, getDoc, collection, addDoc, serverTimestamp } from 'firebase/firestore';
+import { useNavigate } from 'react-router-dom';
 
 const PlaceOrder = () => {
-    const { getTotalCartAmount } = useContext(StoreContext);
+    const { getTotalCartAmount, cartItems, food_list, clearCart } = useContext(StoreContext);
     const [userDetails, setUserDetails] = useState(null);
     const [loadingProfile, setLoadingProfile] = useState(true);
     const [formData, setFormData] = useState({
         firstName: '',
         lastName: '',
         email: '',
-        houseBuildingName: '', // New field for House/Building Name
+        houseBuildingName: '',
         street: '',
-        suburb: '',            // New field for Suburb
+        suburb: '',
         city: '',
         state: '',
         zipCode: '',
         country: '',
         phoneNumber: ''
     });
+
+    const navigate = useNavigate();
+
+    // Helper function for currency formatting
+    const formatCurrency = (amount) => {
+        return new Intl.NumberFormat('en-PH', {
+            style: 'currency',
+            currency: 'PHP', // Philippine Peso
+            minimumFractionDigits: 2,
+            maximumFractionDigits: 2,
+        }).format(amount);
+    };
 
     // --- Function to fetch user data from Firestore ---
     const fetchUserProfile = async (user) => {
@@ -36,17 +49,14 @@ const PlaceOrder = () => {
                 const data = docSnap.data();
                 setUserDetails(data);
 
-                // Extract structured delivery info
-                const deliveryComponents = data.deliveryInfo?.components || {}; // Get components or empty object
+                const deliveryComponents = data.deliveryInfo?.components || {};
 
                 setFormData({
                     firstName: data.firstName || '',
                     lastName: data.lastName || '',
                     email: user.email || '',
-                    // Prioritize house_number, then building for houseBuildingName
                     houseBuildingName: deliveryComponents.name || deliveryComponents.building || '',
                     street: deliveryComponents.road || '',
-                    // Prioritize suburb, then neighbourhood for suburb
                     suburb: deliveryComponents.suburb || deliveryComponents.neighbourhood || '',
                     city: deliveryComponents.city || deliveryComponents.town || deliveryComponents.village || '',
                     state: deliveryComponents.state || '',
@@ -55,13 +65,12 @@ const PlaceOrder = () => {
                     phoneNumber: data.contactInfo || ''
                 });
             } else {
-                console.log("User data not found in Firestore.");
+                console.log("User data not found in Firestore. Filling email.");
                 setUserDetails(null);
                 setFormData(prev => ({ ...prev, email: user.email || '' }));
             }
         } catch (error) {
             console.error("Error fetching user profile:", error);
-            // Optionally show a toast error here
         } finally {
             setLoadingProfile(false);
         }
@@ -81,21 +90,75 @@ const PlaceOrder = () => {
         setFormData(prev => ({ ...prev, [name]: value }));
     };
 
-    // This function will handle the payment process using native fetch API
+    // This function will handle the payment process and order saving
     const handlePayment = async (e) => {
         e.preventDefault();
 
-        console.log("Delivery Information:", formData);
+        if (getTotalCartAmount() === 0) {
+            alert("Your cart is empty. Please add items before proceeding to payment.");
+            return;
+        }
 
-        const totalAmountInCentavos = (getTotalCartAmount() + 60) * 100;
+        if (!auth.currentUser) {
+            alert("Please sign in to place an order.");
+            return;
+        }
 
-        const SECRET_KEY = 'sk_test_FJtrQAYD82Jp8B1uMA37qYFr';
-        const basicAuth = btoa(SECRET_KEY + ':');
+        const userId = auth.currentUser.uid;
+        const orderItems = [];
 
-        const successRedirectUrl = `${window.location.origin}/complete`;
-        const cancelRedirectUrl = `${window.location.origin}/cart`;
+        // Construct order items from cartItems and food_list (products)
+        for (const itemId in cartItems) {
+            if (cartItems[itemId] > 0) {
+                const itemInfo = food_list.find((product) => product.id === itemId);
+                if (itemInfo) {
+                    orderItems.push({
+                        id: itemId,
+                        name: itemInfo.name,
+                        price: itemInfo.price,
+                        quantity: cartItems[itemId],
+                        image: itemInfo.imageUrl,
+                    });
+                }
+            }
+        }
+
+        if (orderItems.length === 0) {
+            alert("Your cart is empty. Cannot place an order.");
+            return;
+        }
+
+        const orderData = {
+            userId: userId,
+            items: orderItems,
+            totalAmount: getTotalCartAmount() + (getTotalCartAmount() === 0 ? 0 : 60), // Subtotal + Delivery Fee
+            deliveryAddress: formData,
+            paymentMethod: 'Paymongo Link',
+            status: 'Pending', // Initial status
+            createdAt: serverTimestamp()
+        };
 
         try {
+            // 1. Save order to Firestore
+            const docRef = await addDoc(collection(db, "orders"), orderData);
+            const orderId = docRef.id;
+            console.log("Order saved to Firestore with ID:", orderId);
+
+            // 2. Clear the cart AFTER successfully saving the order
+            clearCart();
+
+            // 3. Redirect the current tab to the OrderStatus page
+            //    Passing orderId in state so OrderStatus page can fetch its details.
+            navigate('/order', { state: { orderId: orderId } }); // ADDED THIS LINE
+
+            // 4. Proceed with Paymongo payment link creation (opens in new tab)
+            const totalAmountInCentavos = (getTotalCartAmount() + (getTotalCartAmount() === 0 ? 0 : 60)) * 100;
+            const SECRET_KEY = 'sk_test_FJtrQAYD82Jp8B1uMA37qYFr'; // Ensure this is securely handled in production
+            const basicAuth = btoa(SECRET_KEY + ':');
+
+            const successRedirectUrl = `${window.location.origin}/complete?orderId=${orderId}&status=success`;
+            const cancelRedirectUrl = `${window.location.origin}/cart?orderId=${orderId}&status=cancelled`;
+
             const response = await fetch('https://api.paymongo.com/v1/links', {
                 method: 'POST',
                 headers: {
@@ -107,29 +170,10 @@ const PlaceOrder = () => {
                     data: {
                         attributes: {
                             amount: totalAmountInCentavos,
-                            description: 'Online Food Order',
-                            remarks: 'Order from Cartify App',
+                            description: `Order #${orderId} from Cartify App`,
+                            remarks: `User: ${auth.currentUser.email}`,
                             success_url: successRedirectUrl,
                             cancel_url: cancelRedirectUrl,
-                            // You can pass customer details here if Paymongo supports it
-                            // based on the formData
-                            // customer_details: {
-                            //     email: formData.email,
-                            //     first_name: formData.firstName,
-                            //     last_name: formData.lastName,
-                            //     phone: formData.phoneNumber,
-                            //     shipping: {
-                            //         address: {
-                            //             line1: formData.street,
-                            //             line2: formData.houseBuildingName, // Potentially use for line2
-                            //             city: formData.city,
-                            //             state: formData.state,
-                            //             postal_code: formData.zipCode,
-                            //             country: formData.country,
-                            //         },
-                            //         name: `${formData.firstName} ${formData.lastName}`,
-                            //     }
-                            // }
                         }
                     }
                 })
@@ -140,19 +184,21 @@ const PlaceOrder = () => {
             if (response.ok) {
                 console.log("Paymongo Link created successfully:", data);
                 if (data.data.attributes.checkout_url) {
-                    window.location.href = data.data.attributes.checkout_url;
+                    window.open(data.data.attributes.checkout_url, '_blank');
+                    // Optionally, you might want to show a toast/notification here
+                    // to inform the user that a new tab has opened for payment.
                 } else {
-                    console.error("No checkout URL found in the response.", data);
-                    console.log("Failed to get payment link. Please check the console for details.");
+                    console.error("No checkout URL found in the Paymongo response.", data);
+                    alert("Failed to get payment link. Please try again or contact support.");
                 }
             } else {
                 console.error("Paymongo API Error:", data.errors);
-                console.log(`Payment processing failed. Error: ${data.errors?.[0]?.detail || 'Unknown error'}`);
+                alert(`Payment link creation failed: ${data.errors?.[0]?.detail || 'Unknown error'}`);
             }
 
         } catch (err) {
-            console.error("Network or Unexpected Error:", err);
-            console.log("Payment processing failed due to a network error. Please try again.");
+            console.error("Error saving order or processing payment:", err);
+            alert("An error occurred while placing your order. Please try again.");
         }
     };
 
@@ -197,7 +243,7 @@ const PlaceOrder = () => {
                 />
                 <input
                     type="text"
-                    placeholder='House/Building Name' // New input field
+                    placeholder='House/Building Name'
                     name="houseBuildingName"
                     value={formData.houseBuildingName}
                     onChange={handleInputChange}
@@ -212,7 +258,7 @@ const PlaceOrder = () => {
                 />
                 <input
                     type="text"
-                    placeholder='Suburb' // New input field
+                    placeholder='Suburb'
                     name="suburb"
                     value={formData.suburb}
                     onChange={handleInputChange}
@@ -268,17 +314,17 @@ const PlaceOrder = () => {
                     <div>
                         <div className="cart-total-details">
                             <p>Subtotal</p>
-                            <p>₱{getTotalCartAmount().toFixed(2)}</p>
+                            <p>{formatCurrency(getTotalCartAmount())}</p>
                         </div>
                         <hr />
                         <div className="cart-total-details">
                             <p>Delivery Fee</p>
-                            <p>₱{getTotalCartAmount() === 0 ? 0 : 60}</p>
+                            <p>{formatCurrency(getTotalCartAmount() === 0 ? 0 : 60)}</p>
                         </div>
                         <hr />
                         <div className="cart-total-details">
                             <b>Total</b>
-                            <b>₱{(getTotalCartAmount() === 0 ? 0 : getTotalCartAmount() + 60).toFixed(2)}</b>
+                            <b>{formatCurrency(getTotalCartAmount() === 0 ? 0 : getTotalCartAmount() + 60)}</b>
                         </div>
                     </div>
                     <button type="submit">PROCEED TO PAYMENT</button>

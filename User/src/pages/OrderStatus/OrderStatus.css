@@ -262,3 +262,190 @@ html, body {
 .continue-shopping button:hover {
   background-color: #61dafb;
 }
+
+/* --- NEW ADDITIONS ONLY --- */
+/* Style for the separator between orders */
+.order-item-separator {
+  margin: 20px 0;
+  border: 0;
+  border-top: 1px dashed #ccc;
+  background-color: transparent;
+}
+
+/* Style for the "No orders found" message */
+.no-orders-message {
+  text-align: center;
+  padding: 50px;
+  font-size: 1.2rem;
+  color: #888;
+}
+
+/* --- MODIFIED/NEW STYLES FOR ORDER STATUS PAGE (USER SIDE) --- */
+
+/* Overall container for the list of order cards */
+.orders-list-container {
+    display: flex;
+    flex-direction: column;
+    gap: 30px; /* Space between different order cards */
+    padding: 20px; /* Padding around the list of orders */
+}
+
+/* Styling for each individual order card */
+.user-order-card {
+    border: 1px solid #e0e0e0;
+    border-radius: 10px;
+    box-shadow: 0 4px 8px rgba(0,0,0,0.05);
+    overflow: hidden; /* Ensures border-radius applies to children */
+    background-color: #ffffff;
+}
+
+/* Header section within each order card (Order ID, Date, Total, Status) */
+.order-card-header {
+    background-color: #f8f9fa; /* Light header background */
+    padding: 15px 20px;
+    border-bottom: 1px solid #e0e0e0;
+    display: flex;
+    flex-wrap: wrap; /* Allows items to wrap on smaller screens */
+    justify-content: flex-start; /* Changed to start items from the left */
+    align-items: center;
+    gap: 20px; /* Increased gap slightly for better separation */
+}
+
+.order-card-header h3 {
+    margin: 0;
+    font-size: 1.2rem;
+    color: #333;
+    flex-basis: 100%; /* Order ID still takes full width on its line */
+    text-align: left;
+}
+
+.order-card-header p {
+    margin: 0;
+    font-size: 0.95rem;
+    color: #555;
+    flex-shrink: 0; /* Prevent paragraphs from shrinking too much */
+    /* Removed flex-basis: calc(50% - 10px); to allow content-based sizing */
+}
+
+.order-card-header p:last-of-type { /* Total Amount paragraph */
+    text-align: left; /* Reset from right alignment, will align based on flex */
+}
+
+/* Status Colors - MODIFIED FOR COMPACT DISPLAY */
+.order-status {
+    padding: 5px 10px;
+    border-radius: 5px;
+    font-weight: bold;
+    color: white; /* Default text color for statuses */
+    display: inline-block; /* Good for applying padding and background */
+    /* REMOVED: min-width: 90px; */ /* Let it size to content */
+    /* REMOVED: text-align: center; */ /* Not strictly needed with flex */
+    /* REMOVED: margin-top: 10px; */ /* Handled by flex gap */
+    /* REMOVED: flex-basis: 100%; */ /* This was causing it to be a "long bar" */
+
+    margin-left: auto; /* Pushes the status to the far right if space allows */
+    white-space: nowrap; /* Prevents the status text from wrapping to multiple lines */
+}
+
+.status-pending {
+    background-color: #ffc107; /* Amber */
+    color: #333; /* Dark text for light background */
+}
+
+.status-preparing-food-now {
+    background-color: #17a2b8; /* Info blue */
+}
+
+.status-shipped {
+    background-color: #007bff; /* Primary blue */
+}
+
+.status-delivered {
+    background-color: #28a745; /* Success green */
+}
+
+.status-cancelled {
+    background-color: #dc3545; /* Danger red */
+}
+
+.status-refunded {
+    background-color: #6c757d; /* Secondary grey */
+}
+.status-not-set { /* Fallback color for "Status Not Set" */
+  background-color: #adb5bd; /* Light grey */
+}
+
+
+/* Adjustments for the table header within each order card */
+.order-item-table-header {
+    margin-top: 15px; /* Space between order card header and item list header */
+    border-bottom: 1px solid #ddd;
+}
+
+/* Adjust QUANTITY CONTROL to center its content */
+.quantity-control {
+    display: flex; /* Keep flex */
+    align-items: center; /* Vertically center */
+    justify-content: center; /* Horizontally center content */
+    width: 20%; /* Ensure it takes its allocated width */
+}
+
+/* Ensure the span inside quantity-control is centered too */
+.quantity-control span {
+    text-align: center;
+    flex-grow: 1; /* Allow it to take available space within its flex parent */
+}
+
+/* Remove the old separator if it's no longer needed for flat list */
+.order-item-separator {
+  display: none; /* Hide if replaced by order-group-separator */
+}
+
+/* Separator between different order groups (cards) */
+.order-group-separator {
+    margin: 40px 0; /* More space for a clear separation */
+    border: none;
+    border-top: 5px dashed #eee; /* A thicker, more prominent dashed line */
+    width: 100%; /* Ensure it spans full width */
+}
+
+
+/* RESPONSIVE Adjustments for order cards */
+@media screen and (max-width: 768px) {
+    .order-card-header {
+        flex-direction: column; /* Stack details vertically */
+        align-items: flex-start; /* Align left */
+        gap: 5px; /* Reduce gap on small screens */
+    }
+    .order-card-header h3,
+    .order-card-header p {
+        flex-basis: 100%; /* Make paragraphs take full width again */
+        text-align: left;
+    }
+    /* Status should now align left and follow the stacked flow on small screens */
+    .order-card-header .order-status {
+        margin-left: 0; /* Reset margin-left: auto; so it doesn't try to push right */
+        width: auto; /* Let it take natural width */
+        text-align: left;
+        margin-top: 5px; /* Add a small top margin to separate it when stacked */
+    }
+
+    .order-item-table-header {
+        display: none; /* Hide item table header on small screens */
+    }
+    .cart-item {
+        flex-direction: column;
+        align-items: flex-start;
+        padding: 10px; /* Reduce padding */
+    }
+    .cart-item div {
+        width: auto; /* Allow auto width for stacked items */
+        text-align: left;
+    }
+    .quantity-control {
+        justify-content: flex-start; /* Align left on small screens */
+    }
+    .order-group-separator {
+      margin: 20px 0; /* Reduce margin on smaller screens */
+    }
+}

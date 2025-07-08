@@ -1,3 +1,4 @@
+/* src/pages/Product.css (Admin Side) */
 .header{
     font-size:35px;
     font-weight: 600;
@@ -7,7 +8,9 @@
 .list-table-format-prod,
 .list-table-format-prod.title {
   display: grid;
-  grid-template-columns: 1fr 1fr 1fr 1fr 1fr;
+  /* REVISED GRID TEMPLATE COLUMNS FOR 7 COLUMNS: Image, Name, Category, Price, Best Seller, Availability, Action */
+  /* Tuned proportions to fit the new column while maintaining visual balance */
+  grid-template-columns: 0.7fr 1.8fr 1.2fr 1fr 0.7fr 0.7fr 0.5fr; /* Added 0.7fr for Availability */
   align-items: center;
   gap: 10px;
   padding: 12px 15px;
@@ -15,28 +18,36 @@
   font-size: 13px;
 }
 
-
-
 .list-table-format-prod:not(.title):hover {
   background-color: #f0f0f0;
   cursor: pointer;
 }
-
 
 .list-table-format-prod.title {
   background-color: #f9f9f9;
   font-weight: bold;
 }
 
-
 .list-table-format-prod img {
     width:50px;
+    height: 50px;
+    object-fit: cover;
+}
+
+.list-table-format-prod > button {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    border: none;
+    background: none;
+    padding: 0;
+    cursor: pointer;
 }
 
 
 .form-buttons {
-  display: flex;
-  gap: 10px;
+    display: flex;
+    gap: 10px;
 }
 
 .add-btn{
@@ -48,43 +59,42 @@
 }
 
 .header-bar {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
 }
 
 .thick-hr {
-  height: 3px;
-  background-color: black;
-  border: none;
-  margin:none;
+    height: 3px;
+    background-color: black;
+    border: none;
+    margin:none;
 }
 
 .filter-bar {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  margin: 20px 0;
-  gap: 10px;
-  flex-wrap: wrap;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin: 20px 0;
+    gap: 10px;
+    flex-wrap: wrap;
 }
 
 .search-input {
-  flex: 1;
-  min-width: 200px;
-  padding: 8px 12px;
-  font-size: 14px;
-  border: 1px solid gray;
-  border-radius: 4px;
+    flex: 1;
+    min-width: 200px;
+    padding: 8px 12px;
+    font-size: 14px;
+    border: 1px solid gray;
+    border-radius: 4px;
 }
 
 .sort-select {
-  min-width: 200px;
-  padding: 8px 12px;
-  font-size: 14px;
-  border: 1px solid gray;
-  border-radius: 4px;
+    min-width: 200px;
+    padding: 8px 12px;
+    font-size: 14px;
+    border: 1px solid gray;
+    border-radius: 4px;
 }
 
 .action-icon{
@@ -97,81 +107,69 @@
 }
 
 .action-icon:hover{
-    
     background-color: rgb(139, 2, 2);
 }
 
-
 .pagination {
-  display: flex; /* Arranges buttons in a row */
-  justify-content: center; /* Centers the pagination buttons horizontally */
-  align-items: center; /* Vertically aligns items if they have different heights */
-  margin-top: 20px; /* Space above the pagination controls */
-  margin-bottom: 20px; /* Space below the pagination controls */
-  gap: 8px; /* Provides space between the buttons */
-  flex-wrap: wrap; /* Allows buttons to wrap to the next line on smaller screens */
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    margin-top: 20px;
+    margin-bottom: 20px;
+    gap: 8px;
+    flex-wrap: wrap;
 }
 
-/* Styling for individual pagination buttons */
 .pagination button {
-  background-color: #f8f9fa; /* Light background for normal buttons */
-  color: #333; /* Dark text for normal buttons */
-  border: 1px solid #dee2e6; /* Light grey border */
-  padding: 8px 16px; /* Vertical and horizontal padding */
-  font-size: 14px; /* Font size for button text */
-  cursor: pointer; /* Indicates it's clickable */
-  border-radius: 4px; /* Slightly rounded corners */
-  transition: all 0.2s ease-in-out; /* Smooth transition for hover effects */
-  min-width: 40px; /* Ensure a minimum width for consistent sizing */
-  text-align: center; /* Center text within button */
+    background-color: #f8f9fa;
+    color: #333;
+    border: 1px solid #dee2e6;
+    padding: 8px 16px;
+    font-size: 14px;
+    cursor: pointer;
+    border-radius: 4px;
+    transition: all 0.2s ease-in-out;
+    min-width: 40px;
+    text-align: center;
 }
 
-/* Hover effect for pagination buttons */
 .pagination button:hover:not(:disabled) {
-  background-color: #e9ecef; /* Slightly darker background on hover */
-  border-color: #ced4da; /* Slightly darker border on hover */
-  color: #0056b3; /* A common hover color for text */
+    background-color: #e9ecef;
+    border-color: #ced4da;
+    color: #0056b3;
 }
 
-/* Styling for the active (current) page button */
 .pagination button.active {
-  background-color: #007bff; /* Primary blue for active page */
-  color: white; /* White text for active page */
-  border-color: #007bff; /* Blue border for active page */
-  font-weight: bold; /* Make active page number bold */
-  pointer-events: none; /* Disable click on the active button */
+    background-color: #007bff;
+    color: white;
+    border-color: #007bff;
+    font-weight: bold;
+    pointer-events: none;
 }
 
-/* Styling for disabled buttons (Previous/Next when at ends) */
 .pagination button:disabled {
-  background-color: #e9ecef; /* Lighter background for disabled */
-  color: #6c757d; /* Grey text for disabled */
-  cursor: not-allowed; /* Shows a 'no entry' cursor */
-  opacity: 0.7; /* Slightly transparent */
-  border-color: #dee2e6;
+    background-color: #e9ecef;
+    color: #6c757d;
+    cursor: not-allowed;
+    opacity: 0.7;
+    border-color: #dee2e6;
 }
 
-/* Optional: Add some styling for the "no products found" message */
 .no-products-message {
-  text-align: center;
-  padding: 40px 20px; /* More padding to make it stand out */
-  color: #555;
-  font-size: 1.1em;
-  background-color: #f9f9f9;
-  border-radius: 8px;
-  box-shadow: 0 2px 4px rgba(0,0,0,0.05);
-  margin-top: 20px;
+    text-align: center;
+    padding: 40px 20px;
+    color: #555;
+    font-size: 1.1em;
+    background-color: #f9f9f9;
+    border-radius: 8px;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+    margin-top: 20px;
 }
-
-
 
 @media (max-width:600px){
     .list-table-format-prod{
-        grid-template-columns: 1fr 1fr 1fr 1fr 1fr;
-        gap: 15px;
+        /* Adjusted for mobile to also fit 7 columns, reducing widths further */
+        grid-template-columns: 0.7fr 1.2fr 1fr 0.8fr 0.7fr 0.7fr 0.5fr; /* Adjusted for 7 columns */
+        gap: 10px;
     }
-
-   
-
-
 }

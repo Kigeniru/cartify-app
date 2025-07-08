@@ -1,11 +1,13 @@
+// src/pages/Product.js (Admin Side)
+
 import React, { useEffect, useState } from 'react';
 import './Product.css';
-import { collection, getDocs, deleteDoc, doc } from 'firebase/firestore';
+import { collection, onSnapshot, deleteDoc, doc, updateDoc, getDocs } from 'firebase/firestore';
 import { db } from '../../firebase';
 import { useNavigate } from 'react-router-dom';
 import { FaTrash } from "react-icons/fa";
-import ConfirmModal from '../../components/ConfirmModal/ConfirmModal'; // Import ConfirmModal
-import { toast } from 'react-toastify'; // Import toast
+import ConfirmModal from '../../components/ConfirmModal/ConfirmModal';
+import { toast } from 'react-toastify';
 
 
 const Product = () => {
@@ -17,26 +19,23 @@ const Product = () => {
 
   // --- Pagination States ---
   const [currentPage, setCurrentPage] = useState(1);
-  const [productsPerPage] = useState(10); // Limit to 10 products per page
+  const [productsPerPage] = useState(10);
   // --- END Pagination States ---
 
-  // --- NEW States for ConfirmModal (for delete) ---
+  // --- States for ConfirmModal (for delete) ---
   const [showDeleteConfirmModal, setShowDeleteConfirmModal] = useState(false);
   const [productIdToDelete, setProductIdToDelete] = useState(null);
-  // --- END NEW States ---
+  // --- END States ---
 
-  // --- MODIFIED: handleDelete now opens ConfirmModal ---
   const handleDeleteClick = (id) => {
     setProductIdToDelete(id);
     setShowDeleteConfirmModal(true);
   };
 
-  // --- NEW: handleConfirmDelete for the modal's confirm action ---
   const handleConfirmDelete = async () => {
     if (productIdToDelete) {
       try {
         await deleteDoc(doc(db, "products", productIdToDelete));
-        setProducts((prev) => prev.filter(product => product.id !== productIdToDelete));
         toast.success("Product deleted successfully!");
       } catch (error) {
         console.error("Error deleting product:", error);
@@ -48,25 +47,61 @@ const Product = () => {
     }
   };
 
-  // --- NEW: handleCancelDelete for the modal's cancel action ---
   const handleCancelDelete = () => {
     setShowDeleteConfirmModal(false);
     setProductIdToDelete(null);
   };
-  // --- END NEW ---
+
+  const handleToggleBestSeller = async (productId, currentStatus) => {
+    try {
+      const productRef = doc(db, "products", productId);
+      const newStatus = !currentStatus;
+      await updateDoc(productRef, {
+        isBestSeller: newStatus
+      });
+      toast.success(`Product ${newStatus ? 'added to' : 'removed from'} best sellers!`);
+    } catch (error) {
+      console.error("Error updating best seller status:", error);
+      toast.error("Failed to update best seller status.");
+    }
+  };
+
+  // NEW: handleToggleAvailability function
+  const handleToggleAvailability = async (productId, currentStatus, event) => {
+    event.stopPropagation(); // Prevent row click from triggering edit
+    try {
+      const productRef = doc(db, "products", productId);
+      const newStatus = !currentStatus;
+      await updateDoc(productRef, {
+        isAvailable: newStatus // Update the isAvailable field
+      });
+      // CHANGED: Toast message
+      toast.success(`Product marked as ${newStatus ? 'available' : 'unavailable'}!`);
+    } catch (error) {
+      console.error("Error updating availability status:", error);
+      toast.error("Failed to update availability status.");
+    }
+  };
+
 
   useEffect(() => {
-    const fetchData = async () => {
-      try {
-        // Fetch products
-        const productSnapshot = await getDocs(collection(db, "products"));
-        const productsArray = productSnapshot.docs.map(doc => ({
-          id: doc.id,
-          ...doc.data(),
-        }));
-        setProducts(productsArray);
+    // Real-time listener for products
+    const unsubscribeProducts = onSnapshot(collection(db, "products"), (snapshot) => {
+      const productsArray = snapshot.docs.map(doc => ({
+        id: doc.id,
+        ...doc.data(),
+        isBestSeller: doc.data().isBestSeller || false, // Ensure isBestSeller is always defined
+        isAvailable: doc.data().isAvailable !== undefined ? doc.data().isAvailable : true // NEW: Default to true if not set
+      }));
+      setProducts(productsArray);
+    }, (error) => {
+      console.error("Error fetching real-time products:", error);
+      toast.error("Error fetching product data!");
+    });
 
-        // Fetch categories
+    // Fetch categories (can remain getDocs unless categories change frequently)
+    const fetchCategories = async () => {
+      try {
         const categorySnapshot = await getDocs(collection(db, "categories"));
         const categoriesArray = categorySnapshot.docs.map(doc => ({
           id: doc.id,
@@ -74,37 +109,32 @@ const Product = () => {
         }));
         setCategories(categoriesArray);
       } catch (error) {
-        console.error("Error fetching data:", error);
-        toast.error("Error fetching product data!"); // Added toast
+        console.error("Error fetching categories:", error);
+        toast.error("Error fetching category data!");
       }
     };
 
-    fetchData();
+    fetchCategories();
+
+    // Cleanup function for the real-time listener
+    return () => unsubscribeProducts();
   }, []);
 
-  // --- NEW: handleRowClick for navigation to edit page ---
+
   const handleRowClick = (productId) => {
     navigate(`/product/edit/${productId}`);
   };
 
-  // --- Pagination Logic ---
-  // Filter and search products first
   const filteredProducts = products.filter(product =>
-    product.name.toLowerCase().includes(search) &&
+    product.name.toLowerCase().includes(search.toLowerCase()) &&
     (categoryFilter === '' || product.category === categoryFilter)
   );
 
-  // Get current products for the page
   const indexOfLastProduct = currentPage * productsPerPage;
   const indexOfFirstProduct = indexOfLastProduct - productsPerPage;
   const currentProducts = filteredProducts.slice(indexOfFirstProduct, indexOfLastProduct);
-
-  // Calculate total pages
   const totalPages = Math.ceil(filteredProducts.length / productsPerPage);
-
-  // Change page
   const paginate = (pageNumber) => setCurrentPage(pageNumber);
-  // --- END Pagination Logic ---
 
   return (
     <div className='list add flex-col'>
@@ -120,8 +150,8 @@ const Product = () => {
           placeholder="Search product..."
           className="search-input"
           onChange={(e) => {
-            setSearch(e.target.value.toLowerCase());
-            setCurrentPage(1); // Reset to first page on search
+            setSearch(e.target.value);
+            setCurrentPage(1);
           }}
         />
 
@@ -130,12 +160,14 @@ const Product = () => {
           value={categoryFilter}
           onChange={(e) => {
             setCategoryFilter(e.target.value);
-            setCurrentPage(1); // Reset to first page on category filter
+            setCurrentPage(1);
           }}
         >
           <option value="">All Categories</option>
           {categories.map((cat) => (
-            <option key={cat.id} value={cat.name}>{cat.name}</option>
+            <option key={cat.id} value={cat.name}>
+              {cat.name}
+            </option>
           ))}
         </select>
       </div>
@@ -146,6 +178,8 @@ const Product = () => {
           <b>Name</b>
           <b>Category</b>
           <b>Price</b>
+          <b>Best Seller</b>
+          <b>Availability</b> {/* NEW COLUMN HEADER */}
           <b>Action</b>
         </div>
 
@@ -170,6 +204,27 @@ const Product = () => {
                   maximumFractionDigits: 2,
                 })}
               </p>
+              <div>
+                <input
+                  type="checkbox"
+                  checked={product.isBestSeller}
+                  onChange={(e) => {
+                    e.stopPropagation();
+                    handleToggleBestSeller(product.id, product.isBestSeller);
+                  }}
+                  style={{ cursor: 'pointer', transform: 'scale(1.2)' }}
+                />
+              </div>
+              {/* NEW: Availability Checkbox */}
+              <div>
+                <input
+                  type="checkbox"
+                  checked={product.isAvailable}
+                  onChange={(e) => handleToggleAvailability(product.id, product.isAvailable, e)}
+                  style={{ cursor: 'pointer', transform: 'scale(1.2)' }}
+                />
+              </div>
+              {/* END NEW */}
               <button
                 onClick={(e) => {
                   e.stopPropagation();

@@ -77,7 +77,7 @@ const Cart = () => {
                         })}
                     </div>
 
-                    {/* Existing Cart Totals and Promo Code section */}
+                    {/* Existing Cart Totals section */}
                     <div className="cart-bottom">
                         <div className="cart-total">
                             <h2>Cart Totals</h2>
@@ -106,13 +106,8 @@ const Cart = () => {
                             </div>
                         </div>
 
-                        <div className="cart-promocode">
-                            <p>If you have a promo code, Enter it here</p>
-                            <div className='cart-promocode-input'>
-                                <input type="text" placeholder='promo code' />
-                                <button>Submit</button>
-                            </div>
-                        </div>
+                        {/* REMOVED: The entire cart-promocode div was here */}
+
                     </div>
 
                     {/* Clear Cart button strategically placed at the top of the Cart Totals section */}

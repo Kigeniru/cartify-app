@@ -10,3 +10,19 @@
     width:max(10%,80px);
 
 }
+
+
+.logout-button {
+    background-color: #ef4444; /* bg-red-500 */
+    color: white;
+    font-weight: 600; /* font-semibold */
+    padding: 0.5rem 1rem; /* py-2 px-4 */
+    border-radius: 0.375rem; /* rounded-md */
+    border: none;
+    cursor: pointer;
+    transition: background-color 0.15s ease-in-out;
+}
+
+.logout-button:hover {
+    background-color: #dc2626; /* hover:bg-red-600 */
+}

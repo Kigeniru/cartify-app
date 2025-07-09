@@ -10,10 +10,82 @@
     font-family: "Inter", sans-serif; /* font-inter */
 }
 
+/* --- New: Dashboard Header with Title and Print/Export Button --- */
+.dashboard-header {
+    display: flex; /* Use flexbox to align items */
+    justify-content: space-between; /* Pushes content to the ends */
+    align-items: center; /* Vertically centers items */
+    margin-bottom: 32px; /* mb-8, consistent spacing */
+    flex-wrap: wrap; /* Allows items to wrap on smaller screens */
+    gap: 16px; /* Gap between title and button if they wrap */
+}
+
 .dashboard-title {
     font-size: 50px;
     font-weight: bold;
+    margin: 0; /* Reset margin from paragraph tag */
+    line-height: 1; /* Ensures single line height */
 }
+
+/* --- New: Print/Export Dropdown Container --- */
+.print-dropdown-container {
+    position: relative; /* Essential for positioning the dropdown menu */
+    display: inline-block; /* Allows the button to shrink to its content size */
+    margin-left: auto; /* Pushes the container to the right */
+}
+
+.print-button {
+    background-color: #2563eb; /* A shade of blue, similar to text-blue-600 */
+    color: #ffffff; /* White text */
+    padding: 10px 20px; /* Comfortable padding */
+    border: none; /* No border */
+    border-radius: 8px; /* Rounded corners */
+    cursor: pointer; /* Indicates interactivity */
+    font-size: 1rem; /* Standard text size */
+    font-weight: 500; /* Medium weight */
+    display: flex; /* For aligning text and icon */
+    align-items: center; /* Vertically center items */
+    gap: 8px; /* Space between text and dropdown arrow */
+    transition: background-color 0.2s ease-in-out; /* Smooth hover effect */
+}
+
+.print-button:hover {
+    background-color: #1d4ed8; /* Darker blue on hover */
+}
+
+.dropdown-menu {
+    position: absolute;
+    top: 100%; /* Positions the menu directly below the button */
+    right: 0; /* Aligns the menu to the right edge of the button/container */
+    background-color: #ffffff; /* White background */
+    border: 1px solid #e0e0e0; /* Light grey border */
+    border-radius: 8px; /* Rounded corners */
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1); /* Soft shadow */
+    min-width: 180px; /* Minimum width for menu items */
+    z-index: 1000; /* Ensures the dropdown appears above other content */
+    display: flex;
+    flex-direction: column; /* Stacks items vertically */
+    padding: 8px 0; /* Padding inside the dropdown */
+    margin-top: 8px; /* Space between button and dropdown */
+}
+
+.dropdown-item {
+    background: none; /* No background by default */
+    border: none; /* No border */
+    padding: 12px 16px; /* Padding for each item */
+    text-align: left; /* Align text to the left */
+    width: 100%; /* Full width of the dropdown menu */
+    cursor: pointer; /* Indicates interactivity */
+    font-size: 0.95rem; /* Slightly smaller font for items */
+    color: #374151; /* Dark grey text */
+    transition: background-color 0.2s ease-in-out; /* Smooth hover effect */
+}
+
+.dropdown-item:hover {
+    background-color: #f3f4f6; /* Light grey background on hover */
+    color: #1f2937; /* Slightly darker text on hover */
+}
+/* --- End New Styles --- */
 
 /* Dashboard Cards Grid */
 .dashboard-cards-grid {
